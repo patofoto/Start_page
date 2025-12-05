@@ -107,10 +107,18 @@ function renderGoogleApps() {
     });
 }
 
+// Helper to ensure protocol
+function ensureProtocol(url) {
+    if (url && !/^(?:f|ht)tps?:\/\//.test(url) && !url.startsWith('/') && !url.startsWith('#') && !url.startsWith('chrome://') && !url.startsWith('file://')) {
+        return 'https://' + url;
+    }
+    return url;
+}
+
 // Helper to extract domain for Brandfetch
 function getDomain(url) {
     try {
-        return new URL(url).hostname;
+        return new URL(ensureProtocol(url)).hostname;
     } catch (e) {
         return null;
     }
@@ -175,7 +183,7 @@ function renderGrid() {
                         link.links.forEach(subLink => {
                             const a = document.createElement('a');
                             a.className = 'link-item';
-                            a.href = isEditMode ? '#' : subLink.url;
+                            a.href = isEditMode ? '#' : ensureProtocol(subLink.url);
                             a.target = "_blank";
                             if (isEditMode) a.addEventListener('click', (e) => e.preventDefault());
 
@@ -222,7 +230,7 @@ function renderGrid() {
                     // Render a normal link
                     const a = document.createElement('a');
                     a.className = 'link-item';
-                    a.href = isEditMode ? '#' : link.url;
+                    a.href = isEditMode ? '#' : ensureProtocol(link.url);
                     a.target = "_blank"; 
                     
                     if (isEditMode) {
@@ -564,7 +572,7 @@ function saveGroupEdit() {
         const name = row.querySelector('.link-name').value;
         // Handle optional URL input if it exists
         const urlInput = row.querySelector('.link-url');
-        const url = urlInput ? urlInput.value : '';
+        const url = urlInput ? ensureProtocol(urlInput.value.trim()) : '';
         
         const isList = row.classList.contains('list-row');
         const isSubLink = row.classList.contains('sub-link-row');
