@@ -601,6 +601,26 @@ function setupEventListeners() {
         if (e.target === settingsModal) closeSettingsModal();
     });
 
+    // Apps Launcher
+    const appsBtn = document.getElementById('apps-btn');
+    const appsDropdown = document.getElementById('apps-dropdown');
+    
+    if (appsBtn && appsDropdown) {
+        appsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            appsDropdown.classList.toggle('hidden');
+            appsBtn.classList.toggle('active');
+        });
+
+        // Close apps dropdown on outside click
+        window.addEventListener('click', (e) => {
+            if (!appsDropdown.contains(e.target) && !appsBtn.contains(e.target)) {
+                appsDropdown.classList.add('hidden');
+                appsBtn.classList.remove('active');
+            }
+        });
+    }
+
 
     // --- Modal Link Dragging Improved ---
     const linksContainer = document.getElementById('group-links-container');

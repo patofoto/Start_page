@@ -4,22 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Start Page</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="background-overlay"></div>
-    
+
     <header>
         <div class="header-left">
-            <div id="clock" class="clock">00:00</div>
-            <div id="date-display" class="date-display">Loading date...</div>
-            <div id="weather" class="weather">
-                <i class="fas fa-cloud-sun"></i>
-                <span>Loading...</span>
+            <div class="clock" id="clock">00:00</div>
+            <div class="date-display" id="date-display">Monday, January 1</div>
+            <div class="weather" id="weather">
+                <i class="fas fa-cloud"></i>
+                <span>--°F</span>
             </div>
         </div>
 
@@ -27,6 +26,112 @@
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" placeholder="Search google..." id="search-input">
+            </div>
+            <!-- Google Apps Launcher -->
+            <div class="apps-launcher-container">
+                <button id="apps-btn" class="apps-btn" title="Google Apps">
+                    <i class="fas fa-th"></i>
+                </button>
+                <div id="apps-dropdown" class="apps-dropdown hidden">
+                    <div class="apps-grid">
+                        <a href="https://myaccount.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-image: url('https://lh3.googleusercontent.com/a/ACg8ocLQgVi-0awVi-NrndjcNHQcb89XywgVVu3EYtlCyV-GlZoLjhTL=s128-b16-cc-rp-mo'); background-size: cover; background-position: center;"></span>
+                            <span>Account</span>
+                        </a>
+                        <a href="https://www.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -812px"></span>
+                            <span>Search</span>
+                        </a>
+                        <a href="https://maps.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -2146px"></span>
+                            <span>Maps</span>
+                        </a>
+                        <a href="https://www.youtube.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -1102px"></span>
+                            <span>YouTube</span>
+                        </a>
+                        <a href="https://news.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -232px"></span>
+                            <span>News</span>
+                        </a>
+                        <a href="https://mail.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -522px"></span>
+                            <span>Gmail</span>
+                        </a>
+                        <a href="https://meet.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -1856px"></span>
+                            <span>Meet</span>
+                        </a>
+                        <a href="https://chat.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -2494px"></span>
+                            <span>Chat</span>
+                        </a>
+                        <a href="https://contacts.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -464px"></span>
+                            <span>Contacts</span>
+                        </a>
+                        <a href="https://drive.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -2030px"></span>
+                            <span>Drive</span>
+                        </a>
+                        <a href="https://calendar.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -1334px"></span>
+                            <span>Calendar</span>
+                        </a>
+                        <a href="https://translate.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -986px"></span>
+                            <span>Translate</span>
+                        </a>
+                        <a href="https://photos.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -1682px"></span>
+                            <span>Photos</span>
+                        </a>
+                        <a href="https://duo.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -348px"></span>
+                            <span>Voice</span>
+                        </a>
+                        <a href="https://shopping.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -1160px"></span>
+                            <span>Shopping</span>
+                        </a>
+                        <a href="https://docs.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -2204px"></span>
+                            <span>Docs</span>
+                        </a>
+                        <a href="https://sheets.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -406px"></span>
+                            <span>Sheets</span>
+                        </a>
+                        <a href="https://slides.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -2262px"></span>
+                            <span>Slides</span>
+                        </a>
+                        <a href="https://keep.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -116px"></span>
+                            <span>Keep</span>
+                        </a>
+                        <a href="https://analytics.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -2668px"></span>
+                            <span>Analytics</span>
+                        </a>
+                        <a href="https://ads.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -2610px"></span>
+                            <span>Google Ads</span>
+                        </a>
+                        <a href="https://gemini.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -1914px"></span>
+                            <span>Gemini</span>
+                        </a>
+                        <a href="https://travel.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -1044px"></span>
+                            <span>Travel</span>
+                        </a>
+                        <a href="https://forms.google.com" target="_blank" class="app-item">
+                            <span class="google-icon-sprite" style="background-position: 0 -290px"></span>
+                            <span>Forms</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -36,9 +141,9 @@
         </div>
     </header>
 
-    <main id="grid-container" class="grid-container">
-        <!-- Groups will be rendered here -->
-    </main>
+    <div id="grid-container" class="grid-container">
+        <!-- Cards injected by JS -->
+    </div>
 
     <!-- Add Group Modal -->
     <div id="add-group-modal" class="modal hidden">
@@ -47,42 +152,46 @@
             <input type="text" id="new-group-name" placeholder="Group Name">
             <div class="modal-actions">
                 <button id="cancel-add-group">Cancel</button>
-                <button id="confirm-add-group" class="primary-btn">Add</button>
+                <button id="confirm-add-group" class="primary-btn">Add Group</button>
             </div>
         </div>
     </div>
 
-    <!-- Edit Group Modal (Replaces Edit Link Modal) -->
+    <!-- Edit Group Modal -->
     <div id="edit-group-modal" class="modal hidden">
         <div class="modal-content wide">
-            <h3 id="group-modal-title">Edit Group</h3>
-            <input type="text" id="edit-group-title" placeholder="Group Title" style="font-weight: bold; font-size: 1.1em;">
+            <h3>Edit Group</h3>
+            <input type="text" id="edit-group-title" placeholder="Group Title">
             
             <div id="group-links-container">
-                <!-- Link rows will be added here dynamically -->
+                <!-- Links rows injected by JS -->
             </div>
-
+            
             <button id="add-link-row-btn" class="add-link-row-btn"><i class="fas fa-plus"></i> Add Link</button>
-            <button id="add-list-btn" class="add-list-btn"><i class="fas fa-list-ul"></i> Add List</button>
+            <button id="add-list-btn" class="add-list-btn" style="margin-top: 5px;"><i class="fas fa-layer-group"></i> Add List</button>
 
-            <div class="modal-actions">
-                <button id="cancel-group-edit">Cancel</button>
+            <div class="modal-actions" style="justify-content: space-between;">
                 <button id="delete-group-full" class="danger-btn">Delete Group</button>
-                <button id="save-group-edit" class="primary-btn">Save Changes</button>
+                <div style="display:flex; gap:10px;">
+                    <button id="cancel-group-edit">Cancel</button>
+                    <button id="save-group-edit" class="primary-btn">Save Changes</button>
+                </div>
             </div>
         </div>
     </div>
-    
-    <!-- Settings Modal (JSON Import/Export) -->
+
+    <!-- Settings Modal -->
     <div id="settings-modal" class="modal hidden">
         <div class="modal-content">
-            <h3>Settings</h3>
-            <p>Edit your configuration JSON directly or export/import.</p>
-            <textarea id="config-json" rows="10"></textarea>
-            <div class="modal-actions">
-                <button id="close-settings">Close</button>
-                <button id="save-settings" class="primary-btn">Save & Reload</button>
-                <button id="reset-defaults" class="danger-btn">Reset to Defaults</button>
+            <h3>Settings (JSON Data)</h3>
+            <p style="font-size: 0.8em; color: #666; margin-bottom: 10px;">Warning: editing JSON directly can break the app.</p>
+            <textarea id="config-json" rows="15" style="font-family: monospace; font-size: 0.9em;"></textarea>
+            <div class="modal-actions" style="justify-content: space-between;">
+                <button id="reset-defaults" class="danger-btn">Reset Defaults</button>
+                <div style="display:flex; gap:10px;">
+                    <button id="close-settings">Close</button>
+                    <button id="save-settings" class="primary-btn">Save</button>
+                </div>
             </div>
         </div>
     </div>
