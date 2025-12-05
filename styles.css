@@ -1,10 +1,16 @@
 :root {
-    --primary-color: #2c82c9; /* Blue from the image */
-    --bg-color: #f0f0f0;
-    --card-bg: #ffffff;
-    --text-color: #333;
-    --header-text: #fff;
-    --shadow: 0 2px 5px rgba(0,0,0,0.1);
+    --primary-color: #fbbf24; /* Warm yellow/orange from flower */
+    --primary-hover: #f59e0b;
+    --card-bg: rgba(20, 20, 20, 0.45); /* Dark glass */
+    --card-header-bg: rgba(255, 255, 255, 0.1); /* Subtle header sep */
+    --text-color: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.7);
+    --border-color: rgba(255, 255, 255, 0.15);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.3);
+    --font-main: 'Inter', sans-serif;
+    --font-heading: 'Poppins', sans-serif;
+    --bg-image-url: url('https://images.unsplash.com/photo-1460500063983-994d4c27756c?q=80&w=2940&auto=format&fit=crop'); /* Warm nature/flower vibe */
 }
 
 * {
@@ -12,112 +18,210 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--font-main);
     margin: 0;
     padding: 0;
-    background-color: #e5e5e5;
-    background-image: repeating-linear-gradient(
-        45deg,
-        #e5e5e5,
-        #e5e5e5 10px,
-        #f5f5f5 10px,
-        #f5f5f5 20px
-    );
+    background-image: var(--bg-image-url);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     color: var(--text-color);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Dark overlay to ensure text readability */
+.background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    z-index: 0;
 }
 
 header {
-    background-color: #fff;
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 30px 50px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* Left widgets, center search, right settings */
+    align-items: start;
     margin-bottom: 20px;
+    position: relative;
+    z-index: 10;
+}
+
+/* Header Left: Clock/Weather Widget Vibe */
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .clock {
+    font-family: var(--font-heading);
+    font-size: 4em;
+    font-weight: 300; /* Thin font like image */
+    line-height: 1;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    margin-bottom: 5px;
+}
+
+.date-display {
     font-size: 1.2em;
-    color: #666;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 15px;
 }
 
 .weather {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(20, 20, 20, 0.5);
+    backdrop-filter: blur(10px);
+    padding: 10px 20px;
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
     font-size: 1em;
+    color: rgba(255, 255, 255, 0.9);
+    width: fit-content;
+}
+
+.weather i {
+    color: var(--primary-color);
+    font-size: 1.2em;
+}
+
+/* Center: Search Bar */
+.search-container {
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95); /* White bar like image */
+    padding: 12px 25px;
+    border-radius: 30px;
+    width: 500px;
+    max-width: 100%;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+
+.search-bar:focus-within {
+    transform: scale(1.02);
+}
+
+.search-bar i {
     color: #666;
-    font-weight: 600;
+    margin-right: 15px;
+    font-size: 1.1em;
+}
+
+.search-bar input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-size: 1.1em;
+    color: #333;
+    font-family: var(--font-main);
+}
+
+/* Right: Settings */
+.settings-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    padding-top: 10px;
 }
 
 .settings-controls button {
-    background: none;
+    background: transparent;
     border: none;
     cursor: pointer;
-    font-size: 1em;
-    color: #666;
-    margin-left: 10px;
+    font-size: 1.2em;
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.2s ease;
+    padding: 5px;
 }
+
+.settings-controls button:hover {
+    color: #fff;
+    transform: rotate(15deg);
+}
+
+.settings-controls button.active {
+    color: var(--primary-color);
+}
+
 
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    padding: 20px;
-    max-width: 1600px;
-    margin: 0 auto;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 25px;
+    padding: 0 50px 50px 50px;
+    max-width: 100%;
+    position: relative;
+    z-index: 1;
 }
 
+/* Glass Cards */
 .card {
     background: var(--card-bg);
-    border-radius: 4px;
-    box-shadow: var(--shadow);
-    overflow: visible; /* Allow popups to overflow */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    overflow: visible;
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative; /* Context for z-index */
+    transition: all 0.3s ease;
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    background: rgba(30, 30, 30, 0.55);
+    box-shadow: var(--shadow-md);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .card.dragging {
-    opacity: 0.5;
-    border: 2px dashed #2c82c9;
-    transform: scale(0.95);
+    opacity: 0.6;
+    border: 2px dashed var(--primary-color);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .card-header {
-    background-color: var(--primary-color);
-    color: var(--header-text);
-    padding: 10px 15px;
+    background: transparent; /* No separate header bg */
+    color: var(--text-color);
+    padding: 15px 20px;
+    font-family: var(--font-heading);
     font-weight: 600;
     text-transform: uppercase;
     font-size: 0.9em;
+    letter-spacing: 1px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 4px 4px 0 0;
+    border-bottom: 1px solid var(--border-color);
 }
 
-/* Adjust header content layout */
-.header-content {
-    display: flex;
-    align-items: center;
-    flex-grow: 1;
-    overflow: hidden;
-}
-
-.group-title {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Group Handle - HIDDEN by default */
+/* Group Handle */
 .group-handle {
     display: none !important;
     cursor: grab;
-    color: rgba(255,255,255,0.7);
+    color: rgba(255,255,255,0.5);
     margin-right: 10px;
 }
 
-/* Group Handle - VISIBLE ONLY in Edit Mode */
 body.edit-mode .group-handle {
     display: inline-block !important;
 }
@@ -126,41 +230,35 @@ body.edit-mode .group-handle {
     color: #fff;
 }
 
-.group-handle:active {
-    cursor: grabbing;
-}
-
 .card-body {
     padding: 10px;
     flex-grow: 1;
 }
 
 .link-item {
-    display: block;
-    padding: 8px 10px;
-    margin-bottom: 5px;
-    border: 1px solid #eee;
-    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    margin-bottom: 4px;
+    background-color: transparent;
+    border-radius: 10px;
     text-decoration: none;
-    color: var(--text-color);
-    font-size: 0.9em;
-    transition: background-color 0.2s;
-    text-align: center;
-    position: relative;
+    color: var(--text-color); /* White text */
+    font-size: 0.95em;
+    font-weight: 400;
+    transition: all 0.2s;
+    border: 1px solid transparent;
 }
 
 .link-item:hover {
-    background-color: #f9f9f9;
-    border-color: #ddd;
-}
-
-.link-item i {
-    margin-right: 5px;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    transform: translateX(5px);
 }
 
 /* Header Actions */
 .header-actions {
-    display: none; /* Hidden by default */
+    display: none;
     gap: 10px;
 }
 
@@ -170,22 +268,129 @@ body.edit-mode .header-actions {
 
 .header-btn {
     cursor: pointer;
-    color: rgba(255,255,255,0.7);
-    transition: color 0.2s;
+    color: rgba(255,255,255,0.5);
+    transition: all 0.2s;
 }
 
 .header-btn:hover {
-    color: #fff;
+    color: var(--primary-color);
 }
 
-/* Modals */
+/* Add Group Button */
+.add-group-card {
+    border: 2px dashed rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(4px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    cursor: pointer;
+    color: rgba(255,255,255,0.5);
+    font-size: 2.5em;
+    border-radius: 16px;
+    transition: all 0.3s;
+}
+
+body.edit-mode .add-group-card {
+    display: flex;
+}
+
+.add-group-card:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(255,255,255,0.1);
+}
+
+/* Dropdown/List Styles */
+.list-container {
+    margin-bottom: 4px;
+    border-radius: 10px;
+    overflow: visible;
+    position: relative;
+}
+
+.list-header {
+    padding: 12px 15px;
+    background-color: transparent;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-color);
+    user-select: none;
+    position: relative;
+    z-index: 2;
+    border-radius: 10px;
+    transition: background 0.2s;
+}
+
+.list-header:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.list-header i {
+    transition: transform 0.3s;
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+
+.list-header.open i {
+    transform: rotate(180deg);
+}
+
+/* Popup Menu for List Items */
+.list-items {
+    display: none;
+    position: absolute;
+    top: 50%; /* Overlap slightly */
+    left: 100%; /* Flyout to right? Or Standard dropdown? Reference had sidebar flyout. */
+    /* Let's stick to standard drop DOWN for grid layout, but styled like glass */
+    top: 100%;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    
+    background: rgba(30, 30, 30, 0.95); /* Opaque dark */
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 5px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    
+    margin-top: 5px;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.list-items.open {
+    display: block;
+}
+
+.list-items .link-item {
+    padding-left: 15px;
+    border-radius: 8px;
+    font-size: 0.9em;
+}
+
+.list-items .link-item:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* --- Modals (Light Theme for readability in editing) --- */
 .modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -197,253 +402,149 @@ body.edit-mode .header-actions {
 }
 
 .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 5px;
-    width: 400px;
+    background: #fff; /* Keep modals light for easy editing */
+    color: #333;
+    padding: 30px;
+    border-radius: 20px;
+    width: 500px;
     max-width: 90%;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
     max-height: 90vh;
     overflow-y: auto;
 }
 
-/* Wide modal for group editor */
+.modal-content h3 {
+    margin-top: 0;
+    font-family: var(--font-heading);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
 .modal-content.wide {
-    width: 700px;
+    width: 800px;
 }
 
 .modal-content input,
 .modal-content textarea {
     width: 100%;
-    padding: 8px;
+    padding: 12px;
     margin: 10px 0;
     border: 1px solid #ddd;
-    border-radius: 3px;
+    border-radius: 8px;
+    background: #f9fafb;
+    color: #333;
 }
 
+/* Modal Buttons */
 .modal-actions {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    margin-top: 15px;
+    margin-top: 20px;
 }
 
 .modal-actions button {
-    padding: 8px 15px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 3px;
+    border-radius: 8px;
     cursor: pointer;
-    background: #eee;
+    font-weight: 600;
+}
+
+.modal-actions button#cancel-group-edit,
+.modal-actions button#cancel-add-group,
+.modal-actions button#close-settings {
+    background: #e5e7eb;
+    color: #374151;
 }
 
 .modal-actions button.primary-btn {
     background: var(--primary-color);
-    color: white;
+    color: #fff; /* Might need dark text on yellow? */
+    color: #000; /* Black text on yellow for better contrast */
 }
 
 .danger-btn {
-    background: #e74c3c !important;
+    background: #ef4444 !important;
     color: white !important;
 }
 
-/* Edit Group Modal Specifics */
+/* Edit Rows in Modal */
 .link-edit-row {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    color: #333;
     display: flex;
     gap: 10px;
     align-items: center;
-    background: #f9f9f9;
     padding: 10px;
-    border: 1px solid #eee;
-    margin-bottom: 10px;
-    border-radius: 3px;
-    transition: all 0.2s ease; /* Smooth transition for movements */
+    margin-bottom: 8px;
+    border-radius: 8px;
+}
+
+.link-edit-row input {
+    background: #fff;
+    border: 1px solid #d1d5db;
+}
+
+.link-edit-row.list-row {
+    background: #fff7ed; /* Light orange tint */
+    border-color: var(--primary-color);
+}
+
+.sub-link-row {
+    margin-left: 30px;
+    border-left: 3px solid var(--primary-color);
+    background: #f9fafb;
 }
 
 .link-edit-row.dragging {
     opacity: 0.5;
-    border: 1px dashed #2c82c9;
-    background: #eef6fc;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border: 2px dashed var(--primary-color);
 }
 
-.link-edit-row .handle {
-    color: #ccc;
-    cursor: grab; 
-    padding: 5px;
-}
-
-.link-edit-row .handle:hover {
-    color: #999;
-}
-
-.link-edit-row .handle:active {
-    cursor: grabbing;
-}
-
-.link-edit-row input {
-    margin: 0; /* Reset margin for flex items */
-}
-
-.link-edit-row .link-name {
-    flex: 1;
-}
-
-.link-edit-row .link-url {
-    flex: 2;
-}
-
-.link-edit-row .remove-link-btn {
-    color: #e74c3c;
-    cursor: pointer;
-    padding: 5px;
-}
-
-.add-link-row-btn,
-.add-list-btn {
+.add-link-row-btn, .add-list-btn {
+    background: #f3f4f6;
+    color: #4b5563;
+    border: 1px dashed #9ca3af;
     width: 100%;
-    padding: 10px;
-    background: #f0f0f0;
-    border: 1px dashed #ccc;
-    cursor: pointer;
+    padding: 12px;
+    border-radius: 8px;
     margin-top: 10px;
-    border-radius: 3px;
-    color: #666;
-}
-
-.add-list-btn {
-    background: #e0e0e0;
-    border-color: #999;
-    margin-top: 5px;
-}
-
-.add-link-row-btn:hover,
-.add-list-btn:hover {
-    background: #e5e5e5;
-}
-
-/* Add Group Button (Floating or at end of grid) */
-.add-group-card {
-    border: 2px dashed #ccc;
-    background: transparent;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    min-height: 200px;
     cursor: pointer;
-    color: #999;
-    font-size: 3em;
 }
 
-body.edit-mode .add-group-card {
-    display: flex;
+.add-link-row-btn:hover, .add-list-btn:hover {
+    background: #e5e7eb;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
 }
 
-.add-group-card:hover {
-    border-color: #999;
-    color: #666;
-}
-
-/* Dropdown/List Styles */
-.list-container {
-    margin-bottom: 5px;
-    border: 1px solid #eee;
-    border-radius: 3px;
-    overflow: visible; /* Allow absolute children to show */
-    position: relative; /* Anchor for absolute dropdown */
-}
-
-.list-header {
-    padding: 8px 10px;
-    background-color: #e0e0e0;
-    cursor: pointer;
-    font-weight: 600;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #333;
-    user-select: none;
-    position: relative; /* Ensure it stays above list items if needed */
-    z-index: 2;
-}
-
-.list-header:hover {
-    background-color: #d5d5d5;
-}
-
-.list-header i {
-    transition: transform 0.2s;
-}
-
-.list-header.open i {
-    transform: rotate(180deg);
-}
-
-.list-items {
-    display: none;
-    position: absolute; /* Pop up behavior */
-    top: 100%;
-    left: -1px; /* Align with border */
-    width: calc(100% + 2px); /* align with container border */
-    z-index: 100;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 0 0 3px 3px;
-}
-
-.list-items.open {
-    display: block;
-}
-
-.list-items .link-item {
-    margin-bottom: 0;
-    border: none;
-    border-bottom: 1px solid #eee;
-    padding-left: 15px;
-    background-color: #fff;
-    text-align: left; /* Better for menus */
-}
-
-.list-items .link-item:hover {
-    background-color: #f5f5f5;
-}
-
-.list-items .link-item:last-child {
-    border-bottom: none;
-}
-
-/* Edit Mode Styles for Lists */
-.link-edit-row.list-row {
-    background: #eef6fc;
-    border-color: #2c82c9;
-    font-weight: bold;
-}
-
-/* Indented sub-link style */
-.sub-link-row {
-    margin-left: 30px;
-    border-left: 3px solid #2c82c9;
-}
-
-/* Helper class for children being moved with their parent list */
-.link-edit-row.dragging-child {
-    opacity: 0.7;
-    background-color: #f0f8ff;
-    pointer-events: none; /* Ensure they don't interfere with drag events */
-    transition: none; /* Snap with parent */
-}
-
-/* Visual feedback when dragging over a list to nest inside it */
-.link-edit-row.drag-over-list {
-    border: 2px dashed #2c82c9;
-    background-color: #e6f7ff;
-}
-
-/* Visual feedback for inserting before/after */
-.link-edit-row.drag-over-top {
-    border-top: 2px solid #2c82c9;
-}
-
-.link-edit-row.drag-over-bottom {
-    border-bottom: 2px solid #2c82c9;
+/* Media Queries for Responsiveness */
+@media (max-width: 800px) {
+    header {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .header-left {
+        align-items: center;
+    }
+    
+    .search-container {
+        width: 100%;
+    }
+    
+    .search-bar {
+        width: 100%;
+    }
+    
+    .settings-controls {
+        justify-content: center;
+    }
+    
+    .clock {
+        font-size: 3em;
+    }
 }

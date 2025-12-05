@@ -4,6 +4,7 @@ let appData = JSON.parse(localStorage.getItem('startPageData')) || defaultData;
 // Elements
 const gridContainer = document.getElementById('grid-container');
 const clockEl = document.getElementById('clock');
+const dateEl = document.getElementById('date-display'); // New element
 const weatherEl = document.getElementById('weather');
 const editModeBtn = document.getElementById('edit-mode-btn');
 const settingsBtn = document.getElementById('settings-btn');
@@ -222,9 +223,12 @@ function toggleEditMode() {
 function startClock() {
     function update() {
         const now = new Date();
-        clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const dateStr = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
-        clockEl.textContent += ` | ${dateStr}`;
+        // Clock: 12:00 PM
+        clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        // Date: Thursday, December 4
+        const dateStr = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+        if (dateEl) dateEl.textContent = dateStr;
     }
     update();
     setInterval(update, 1000);
@@ -248,7 +252,8 @@ async function getWeather(lat, lon) {
     try {
         const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit`);
         const data = await res.json();
-        weatherEl.textContent = `${Math.round(data.current_weather.temperature)}°F`;
+        // Format: Icon + Temp + Unit (e.g., "72°F")
+        weatherEl.innerHTML = `<i class="fas fa-cloud-sun"></i> <span>${Math.round(data.current_weather.temperature)}°F</span>`;
     } catch (e) {
         weatherEl.textContent = "Weather Unavailable";
     }
@@ -662,6 +667,20 @@ function setupEventListeners() {
         
         if (gridContainer.lastElementChild !== addButton) {
             gridContainer.appendChild(addButton);
+        }
+    });
+}
+
+// Search handling (Visual Only for now as requested by "vibe")
+const searchInput = document.getElementById('search-input');
+if(searchInput) {
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const query = searchInput.value;
+            if(query) {
+                window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+                searchInput.value = '';
+            }
         }
     });
 }
