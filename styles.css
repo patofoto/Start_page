@@ -71,6 +71,13 @@ header {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card.dragging {
+    opacity: 0.5;
+    border: 2px dashed #2c82c9;
+    transform: scale(0.95);
 }
 
 .card-header {
@@ -83,6 +90,40 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+/* Adjust header content layout */
+.header-content {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.group-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Group Handle */
+.group-handle {
+    display: none; /* Hidden by default */
+    cursor: grab;
+    color: rgba(255,255,255,0.7);
+    margin-right: 10px;
+}
+
+.group-handle:hover {
+    color: #fff;
+}
+
+.group-handle:active {
+    cursor: grabbing;
+}
+
+body.edit-mode .group-handle {
+    display: inline-block;
 }
 
 .card-body {
