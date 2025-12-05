@@ -115,7 +115,7 @@ header {
 
 /* Edit Mode Styles */
 body.edit-mode .link-item {
-    /* border: 1px dashed #999; */ /* Removed individual edit style */
+    /* border: 1px dashed #999; */ 
 }
 
 /* Header Actions */
@@ -216,6 +216,28 @@ body.edit-mode .header-actions {
     border: 1px solid #eee;
     margin-bottom: 10px;
     border-radius: 3px;
+    transition: all 0.2s ease; /* Smooth transition for movements */
+}
+
+.link-edit-row.dragging {
+    opacity: 0.5;
+    border: 1px dashed #2c82c9;
+    background: #eef6fc;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.link-edit-row .handle {
+    color: #ccc;
+    cursor: grab; 
+    padding: 5px;
+}
+
+.link-edit-row .handle:hover {
+    color: #999;
+}
+
+.link-edit-row .handle:active {
+    cursor: grabbing;
 }
 
 .link-edit-row input {

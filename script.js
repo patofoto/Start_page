@@ -176,18 +176,72 @@ function addLinkRow(name = '', url = '') {
     const container = document.getElementById('group-links-container');
     const div = document.createElement('div');
     div.className = 'link-edit-row';
+    div.draggable = false; // Default to false, enable only on handle click
     div.innerHTML = `
-        <i class="fas fa-grip-vertical" style="color:#ccc; cursor:move"></i>
+        <i class="fas fa-grip-vertical handle" title="Drag to reorder"></i>
         <input type="text" class="link-name" placeholder="Name" value="${name}">
         <input type="text" class="link-url" placeholder="URL" value="${url}">
-        <i class="fas fa-trash remove-link-btn"></i>
+        <i class="fas fa-trash remove-link-btn" title="Remove link"></i>
     `;
     
+    // Drag Events
+    // Use mousedown to track if we are clicking the handle
+    let isHandleClicked = false;
+    
+    const handle = div.querySelector('.handle');
+    handle.addEventListener('mousedown', () => {
+        isHandleClicked = true;
+        div.draggable = true; // Enable drag only when handle is held
+    });
+
+    handle.addEventListener('mouseup', () => {
+        isHandleClicked = false;
+        div.draggable = false;
+    });
+
+    // Reset if mouse leaves handle without drag starting
+    handle.addEventListener('mouseleave', () => {
+        if (!div.classList.contains('dragging')) {
+             isHandleClicked = false;
+             div.draggable = false;
+        }
+    });
+
+    div.addEventListener('dragstart', (e) => {
+        if (!isHandleClicked) {
+            e.preventDefault();
+            return;
+        }
+        
+        div.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', '');
+    });
+
+    div.addEventListener('dragend', () => {
+        div.classList.remove('dragging');
+    });
+
     div.querySelector('.remove-link-btn').addEventListener('click', () => {
         div.remove();
     });
 
     container.appendChild(div);
+}
+
+// Helper for Drag & Drop
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.link-edit-row:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 function closeEditGroupModal() {
@@ -298,6 +352,29 @@ function setupEventListeners() {
         if (e.target === editGroupModal) closeEditGroupModal();
         if (e.target === addGroupModal) closeAddGroupModal();
         if (e.target === settingsModal) closeSettingsModal();
+    });
+
+    // Drag Over Event for Reordering
+    const linksContainer = document.getElementById('group-links-container');
+    
+    linksContainer.addEventListener('dragover', (e) => {
+        e.preventDefault(); // Allow dropping
+        const draggable = document.querySelector('.dragging');
+        if (!draggable) return;
+
+        const afterElement = getDragAfterElement(linksContainer, e.clientY);
+        
+        if (afterElement == null) {
+            linksContainer.appendChild(draggable);
+        } else {
+            linksContainer.insertBefore(draggable, afterElement);
+        }
+    });
+
+    // Ensure dragend cleans up even if dropped outside
+    linksContainer.addEventListener('dragend', () => {
+        const draggable = document.querySelector('.dragging');
+        if (draggable) draggable.classList.remove('dragging');
     });
 }
 
