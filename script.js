@@ -468,12 +468,59 @@ function addLinkRow(name = '', url = '', type = 'link') {
         <i class="fas fa-grip-vertical handle" title="Drag to reorder"></i>
         <input type="text" class="link-name" placeholder="${namePlaceholder}" value="${name}" style="${nameStyle}">
         ${type !== 'list' ? `<input type="text" class="link-url" placeholder="${placeholder}" value="${url}" ${urlInputDisabled}>` : ''}
+        ${type === 'list' ? `<i class="fas fa-external-link-alt convert-list-btn" title="Convert to Group" style="margin-right: 8px; cursor: pointer; color: #555;"></i>` : ''}
         <i class="fas fa-trash remove-link-btn" title="Remove"></i>
     `;
     
     // Drag Events
     let isHandleClicked = false;
     const handle = div.querySelector('.handle');
+
+    // Convert List to Group Button
+    const convertBtn = div.querySelector('.convert-list-btn');
+    if (convertBtn) {
+        convertBtn.addEventListener('click', () => {
+            if (confirm('Convert this list to a new group? This will save all current changes.')) {
+                // 1. Gather data from current row
+                const listName = div.querySelector('.link-name').value;
+                const links = [];
+                
+                // Identify children rows
+                let next = div.nextElementSibling;
+                while (next && next.classList.contains('sub-link-row')) {
+                    links.push({
+                        name: next.querySelector('.link-name').value,
+                        url: next.querySelector('.link-url').value
+                    });
+                    next = next.nextElementSibling;
+                }
+                
+                // 2. Create new group
+                const newGroup = {
+                    id: 'g' + Date.now(),
+                    title: listName || 'New Group',
+                    links: links.map(l => ({
+                        id: 'l' + Math.random().toString(36).substr(2, 9),
+                        name: l.name,
+                        url: ensureProtocol(l.url) // ensure protocol on conversion
+                    }))
+                };
+                appData.groups.push(newGroup);
+                
+                // 3. Remove list and sublinks from DOM (so saveGroupEdit doesn't see them)
+                let toRemove = div.nextElementSibling;
+                while (toRemove && toRemove.classList.contains('sub-link-row')) {
+                    const nextToRemove = toRemove.nextElementSibling;
+                    toRemove.remove();
+                    toRemove = nextToRemove;
+                }
+                div.remove();
+                
+                // 4. Save current group edits (which effectively removes the list from the old group)
+                saveGroupEdit();
+            }
+        });
+    }
     
     handle.addEventListener('mousedown', () => {
         isHandleClicked = true;
