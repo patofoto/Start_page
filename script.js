@@ -356,6 +356,16 @@ function addLinkRow(name = '', url = '', type = 'link') {
         // Set data to identify if it's a list or link
         e.dataTransfer.setData('text/plain', type);
         e.dataTransfer.setData('application/json', JSON.stringify({ type, name }));
+
+        // NEW: If dragging a list, also mark its children as "being dragged" (visually or logically)
+        if (type === 'list') {
+            // Identify all subsequent sub-links
+            let next = div.nextElementSibling;
+            while (next && next.classList.contains('sub-link-row')) {
+                next.classList.add('dragging-child'); // Helper class we can style or query
+                next = next.nextElementSibling;
+            }
+        }
     });
 
     div.addEventListener('dragend', () => {
@@ -364,7 +374,7 @@ function addLinkRow(name = '', url = '', type = 'link') {
         
         // Cleanup visual markers
         document.querySelectorAll('.link-edit-row').forEach(row => {
-            row.classList.remove('drag-over-list', 'drag-over-top', 'drag-over-bottom');
+            row.classList.remove('drag-over-list', 'drag-over-top', 'drag-over-bottom', 'dragging-child');
         });
         
         // Auto-update indentation based on position relative to lists
@@ -549,7 +559,7 @@ function setupEventListeners() {
         const draggingItem = document.querySelector('.link-edit-row.dragging');
         if (!draggingItem) return;
 
-        const siblings = [...linksContainer.querySelectorAll('.link-edit-row:not(.dragging)')];
+        const siblings = [...linksContainer.querySelectorAll('.link-edit-row:not(.dragging):not(.dragging-child)')];
         const nextSibling = siblings.find(sibling => {
             const box = sibling.getBoundingClientRect();
             return e.clientY <= box.top + box.height / 2;
@@ -562,6 +572,23 @@ function setupEventListeners() {
              linksContainer.insertBefore(draggingItem, nextSibling);
         } else {
              linksContainer.appendChild(draggingItem);
+        }
+
+        // MOVE CHILDREN LOGIC:
+        // If we are dragging a list, we must move its marked children to follow it immediately
+        if (draggingItem.dataset.type === 'list') {
+            const children = document.querySelectorAll('.dragging-child');
+            let ref = draggingItem;
+            children.forEach(child => {
+                // Insert after the ref (draggingItem or previous child)
+                // insertBefore(newNode, referenceNode.nextSibling) is effectively insertAfter
+                if (ref.nextSibling) {
+                    linksContainer.insertBefore(child, ref.nextSibling);
+                } else {
+                    linksContainer.appendChild(child);
+                }
+                ref = child;
+            });
         }
         
         // DYNAMIC INDENTATION CHECK

@@ -408,6 +408,14 @@ body.edit-mode .add-group-card {
     border-left: 3px solid #2c82c9;
 }
 
+/* Helper class for children being moved with their parent list */
+.link-edit-row.dragging-child {
+    opacity: 0.7;
+    background-color: #f0f8ff;
+    pointer-events: none; /* Ensure they don't interfere with drag events */
+    transition: none; /* Snap with parent */
+}
+
 /* Visual feedback when dragging over a list to nest inside it */
 .link-edit-row.drag-over-list {
     border: 2px dashed #2c82c9;
