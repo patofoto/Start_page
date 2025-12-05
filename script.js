@@ -10,9 +10,19 @@ if (!appData.enabledGoogleApps) {
     ];
 }
 
+// Remove unwanted apps (Migration/Cleanup)
+const appsToRemove = ["Search", "News", "Chat", "Contacts", "Photos", "Voice", "Shopping", "Keep", "Forms"];
+if (appData.enabledGoogleApps) {
+    const originalLength = appData.enabledGoogleApps.length;
+    appData.enabledGoogleApps = appData.enabledGoogleApps.filter(app => !appsToRemove.includes(app));
+    if (appData.enabledGoogleApps.length !== originalLength) {
+        saveData(); // Save if changes were made
+    }
+}
+
 // Master list of Google Apps
 const googleAppsConfig = [
-    { name: "Account", url: "https://myaccount.google.com", iconStyle: "background-image: url('https://lh3.googleusercontent.com/a/ACg8ocLQgVi-0awVi-NrndjcNHQcb89XywgVVu3EYtlCyV-GlZoLjhTL=s128-b16-cc-rp-mo'); background-size: cover; background-position: center; border-radius: 50%;" },
+    { name: "Account", url: "https://myaccount.google.com", iconStyle: "background-image: url('https://lh3.googleusercontent.com/a/default-user=s128'); background-size: cover; background-position: center; border-radius: 50%;" },
     { name: "Search", url: "https://www.google.com", iconStyle: "background-position: 0 -812px" },
     { name: "Maps", url: "https://maps.google.com", iconStyle: "background-position: 0 -2146px" },
     { name: "YouTube", url: "https://www.youtube.com", iconStyle: "background-position: 0 -1102px" },
