@@ -164,7 +164,7 @@ header {
 .grid-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 25px;
+    gap: 20px; /* Reduced from 25px */
     padding: 0 50px 50px 50px;
     max-width: 100%;
     position: relative;
@@ -202,7 +202,7 @@ header {
 .card-header {
     background: transparent; /* No separate header bg */
     color: var(--text-color);
-    padding: 15px 20px;
+    padding: 10px 15px; /* Reduced from 15px 20px */
     font-family: var(--font-heading);
     font-weight: 600;
     text-transform: uppercase;
@@ -231,24 +231,24 @@ body.edit-mode .group-handle {
 }
 
 .card-body {
-    padding: 10px;
+    padding: 8px; /* Reduced from 10px */
     flex-grow: 1;
 }
 
 .link-item {
     display: flex;
     align-items: center;
-    padding: 12px 15px;
-    margin-bottom: 4px;
+    padding: 8px 10px; /* Reduced from 12px 15px */
+    margin-bottom: 2px; /* Reduced from 4px */
     background-color: transparent;
     border-radius: 10px;
     text-decoration: none;
     color: var(--text-color); /* White text */
-    font-size: 0.95em;
+    font-size: 0.9em; /* Slightly reduced */
     font-weight: 400;
     transition: all 0.2s;
     border: 1px solid transparent;
-    gap: 12px;
+    gap: 12px; /* Space between icon and text */
 }
 
 .link-item:hover {
@@ -262,7 +262,7 @@ body.edit-mode .group-handle {
     height: 20px;
     object-fit: contain;
     border-radius: 4px;
-    flex-shrink: 0;
+    flex-shrink: 0; /* Prevent shrinking if text is long */
 }
 
 /* Header Actions */
@@ -313,14 +313,14 @@ body.edit-mode .add-group-card {
 
 /* Dropdown/List Styles */
 .list-container {
-    margin-bottom: 4px;
+    margin-bottom: 2px; /* Reduced from 4px */
     border-radius: 10px;
     overflow: visible;
     position: relative;
 }
 
 .list-header {
-    padding: 12px 15px;
+    padding: 8px 10px; /* Reduced from 12px 15px */
     background-color: transparent;
     cursor: pointer;
     font-weight: 500;
