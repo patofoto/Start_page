@@ -179,7 +179,7 @@ function applyBrandStyling(headerElement, brandData) {
     if (banner && banner.formats && banner.formats.length > 0) {
         headerElement.style.backgroundImage = `url('${banner.formats[0].src}')`;
         headerElement.style.backgroundSize = 'cover';
-        headerElement.style.backgroundPosition = 'center';
+        headerElement.style.backgroundPosition = 'center top';
         headerElement.style.color = '#fff'; // Assume dark banner
         headerElement.classList.add('branded'); // Add branded class
     } else {
