@@ -94,6 +94,27 @@ async function init() {
 }
 
 function initGoogleAuth() {
+    // Check locally stored token first
+    const storedToken = localStorage.getItem('google_token');
+    if (storedToken) {
+        try {
+            const payload = parseJwt(storedToken);
+            // Basic expiration check (exp is in seconds)
+            if (payload.exp * 1000 > Date.now()) {
+                console.log("Restoring session for:", payload.email);
+                googleAuthToken = storedToken;
+                updateAuthUI(true);
+                if (payload.picture) updateAccountIcon(payload.picture);
+            } else {
+                console.log("Session expired");
+                localStorage.removeItem('google_token');
+            }
+        } catch (e) {
+            console.error("Invalid stored token", e);
+            localStorage.removeItem('google_token');
+        }
+    }
+
     // Check if auth is configured
     // Use appData.authConfig.clientId which is injected by server GET
     if (appData.authConfig && appData.authConfig.clientId) {
@@ -116,7 +137,12 @@ function initGoogleAuth() {
                     btnContainer,
                     { theme: "outline", size: "large", type: "icon", shape: "circle" }
                 );
-                btnContainer.style.display = 'block';
+                // Only show if NOT logged in (prevent flashing/duplicate if already authed)
+                if (!googleAuthToken) {
+                    btnContainer.style.display = 'block';
+                } else {
+                    btnContainer.style.display = 'none';
+                }
             }
         } catch (e) {
             console.error("Google Auth Init Error:", e);
@@ -136,6 +162,8 @@ function initGoogleAuth() {
 window.handleCredentialResponse = function(response) {
     if (response.credential) {
         googleAuthToken = response.credential; // Store token for API calls
+        localStorage.setItem('google_token', response.credential); // Persist session
+        
         const payload = parseJwt(response.credential);
         console.log("Logged in as:", payload.email);
         
@@ -144,8 +172,22 @@ window.handleCredentialResponse = function(response) {
         
         // Success
         updateAuthUI(true);
+        
+        // Update Account Icon
+        if (payload.picture) {
+            updateAccountIcon(payload.picture);
+        }
     }
 };
+
+function updateAccountIcon(pictureUrl) {
+    // Update config
+    const accountApp = googleAppsConfig.find(app => app.name === "Account");
+    if (accountApp) {
+        accountApp.iconStyle = `background-image: url('${pictureUrl}'); background-size: cover; background-position: center; border-radius: 50%;`;
+        renderGoogleApps();
+    }
+}
 
 function parseJwt (token) {
     var base64Url = token.split('.')[1];
@@ -185,6 +227,15 @@ function logout() {
     // But effectively we just reset our UI state.
     updateAuthUI(false);
     googleAuthToken = null; // Clear token
+    localStorage.removeItem('google_token'); // Clear persistence
+    
+    // Reset Account Icon to default
+    const accountApp = googleAppsConfig.find(app => app.name === "Account");
+    if (accountApp) {
+        accountApp.iconStyle = "background-image: url('https://lh3.googleusercontent.com/a/default-user=s128'); background-size: cover; background-position: center; border-radius: 50%;";
+        renderGoogleApps();
+    }
+
     if (window.google) {
         google.accounts.id.disableAutoSelect();
     }
