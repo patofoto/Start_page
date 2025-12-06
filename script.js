@@ -33,7 +33,7 @@ if (appData.enabledGoogleApps) {
 
 // Master list of Google Apps
 const googleAppsConfig = [
-    { name: "Account", url: "https://myaccount.google.com", iconStyle: "background-image: url('https://lh3.googleusercontent.com/a/default-user=s128'); background-size: cover; background-position: center; border-radius: 50%;" },
+    { name: "Account", url: "https://myaccount.google.com", iconStyle: "background-image: url('https://lh3.googleusercontent.com/a/default-user=s128'); background-size: cover; background-position: center; border-radius: 50%; height: 53px;" },
     { name: "Search", url: "https://www.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/symbol.svg?c=1bxqgni3028cv5nwvd3065wbbpy7Yl9DD0C'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Maps", url: "https://maps.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idNQ5aWWN-.svg?c=1bxqgni3028cv5nwvd3065wbbpy7Yl9DD0C'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "YouTube", url: "https://www.youtube.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/youtube.com/icon/theme/dark/icon.svg?c=1idMkDQhG_dtotScqNn'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
@@ -184,7 +184,7 @@ function updateAccountIcon(pictureUrl) {
     // Update config
     const accountApp = googleAppsConfig.find(app => app.name === "Account");
     if (accountApp) {
-        accountApp.iconStyle = `background-image: url('${pictureUrl}'); background-size: cover; background-position: center; border-radius: 50%;`;
+        accountApp.iconStyle = `background-image: url('${pictureUrl}'); background-size: cover; background-position: center; border-radius: 50%; height: 53px;`;
         renderGoogleApps();
     }
 }
@@ -232,7 +232,7 @@ function logout() {
     // Reset Account Icon to default
     const accountApp = googleAppsConfig.find(app => app.name === "Account");
     if (accountApp) {
-        accountApp.iconStyle = "background-image: url('https://lh3.googleusercontent.com/a/default-user=s128'); background-size: cover; background-position: center; border-radius: 50%;";
+        accountApp.iconStyle = "background-image: url('https://lh3.googleusercontent.com/a/default-user=s128'); background-size: cover; background-position: center; border-radius: 50%; height: 53px;";
         renderGoogleApps();
     }
 
