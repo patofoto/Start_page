@@ -207,6 +207,47 @@ function getDomain(url) {
     }
 }
 
+// Helper to create link icon (Brandfetch -> Favicon -> Generic Fallback)
+function createLinkIcon(url) {
+    const domain = getDomain(url);
+    if (!domain) return createGenericIcon();
+
+    // Check for local IP/domain
+    const isLocal = /^(?:localhost|127\.|192\.168\.|10\.|172\.(?:1[6-9]|2\d|3[01])\.)/.test(domain) || 
+                    /\.(?:local|lan|test|home)$/.test(domain);
+
+    const img = document.createElement('img');
+    img.className = 'link-icon';
+    img.alt = '';
+    
+    if (isLocal) {
+        // Try local favicon for local IPs/domains
+        try {
+            const urlObj = new URL(ensureProtocol(url));
+            img.src = `${urlObj.origin}/favicon.ico`;
+        } catch (e) {
+            return createGenericIcon();
+        }
+    } else {
+        // Use Brandfetch for public domains
+        img.src = `https://cdn.brandfetch.io/${domain}/fallback/lettermark/icon.svg?c=1idMkDQhG_dtotScqNn`;
+    }
+
+    img.onerror = () => {
+        // If image fails, replace with generic icon
+        const icon = createGenericIcon();
+        img.replaceWith(icon);
+    };
+
+    return img;
+}
+
+function createGenericIcon() {
+    const i = document.createElement('i');
+    i.className = 'fas fa-globe link-icon generic-icon';
+    return i;
+}
+
 // --- Rendering ---
 function renderGrid() {
     gridContainer.innerHTML = '';
@@ -319,15 +360,8 @@ function renderGrid() {
                             if (isEditMode) a.addEventListener('click', (e) => e.preventDefault());
 
                             // Icon logic
-                            const domain = getDomain(subLink.url);
-                            if (domain) {
-                                const img = document.createElement('img');
-                                img.src = `https://cdn.brandfetch.io/${domain}/fallback/lettermark/icon.svg?c=1idMkDQhG_dtotScqNn`;
-                                img.className = 'link-icon';
-                                img.alt = '';
-                                img.onerror = () => { img.style.display = 'none'; }; // Hide if failed
-                                a.appendChild(img);
-                            }
+                            const iconElement = createLinkIcon(subLink.url);
+                            if (iconElement) a.appendChild(iconElement);
 
                             const span = document.createElement('span');
                             span.textContent = subLink.name;
@@ -369,15 +403,8 @@ function renderGrid() {
                     }
 
                     // Icon logic
-                    const domain = getDomain(link.url);
-                    if (domain) {
-                        const img = document.createElement('img');
-                        img.src = `https://cdn.brandfetch.io/${domain}/fallback/lettermark/icon.svg?c=1idMkDQhG_dtotScqNn`;
-                        img.className = 'link-icon';
-                        img.alt = '';
-                        img.onerror = () => { img.style.display = 'none'; }; // Hide if failed
-                        a.appendChild(img);
-                    }
+                    const iconElement = createLinkIcon(link.url);
+                    if (iconElement) a.appendChild(iconElement);
 
                     const span = document.createElement('span');
                     span.textContent = link.name;

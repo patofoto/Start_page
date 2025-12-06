@@ -440,6 +440,15 @@ body.edit-mode .group-handle {
     flex-shrink: 0; /* Prevent shrinking if text is long */
 }
 
+i.link-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1em;
+    border-radius: 0;
+    color: var(--primary-color);
+}
+
 /* Header Actions */
 .header-actions {
     display: none;
