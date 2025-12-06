@@ -1,42 +1,113 @@
-# Custom Start Page
+# Start Page
 
-A clean, customizable browser start page with bookmarks, groups, clock, and weather.
+A customizable, minimal, and responsive start page for your browser. It features a clock, weather widget, Google search, Google Apps launcher, and a customizable grid of link groups. It is designed to be hosted on **Cloudflare Pages** and uses **Cloudflare KV** for syncing your configuration across devices.
 
 ## Features
-- **Grouped Bookmarks**: Organize your links into custom groups.
-- **Live Clock**: Shows current time and date.
-- **Weather**: Displays current temperature (defaults to NYC, tries geolocation).
-- **Edit Mode**: Add, edit, and delete groups and links directly from the UI.
-- **Data Persistence**: Saves your configuration to your browser's LocalStorage.
-- **Import/Export**: Backup your configuration to JSON.
 
-## Setup & Editing
-1. Open `index.html` in your browser.
-2. Click the **Edit** icon (pencil) in the top right to enter Edit Mode.
-3. **Add Group**: Click the big "+" card at the bottom.
-4. **Add Link**: Click "Add Link" inside any group.
-5. **Edit/Delete**: Click existing links to edit or delete them.
-6. **Settings**: Click "Settings" to view/export your raw JSON data.
+- **Customizable Links:** Organize your favorite sites into groups and lists.
+- **Sync Across Devices:** Data is stored in Cloudflare KV, so your start page looks the same everywhere.
+- **Google Integration:**
+  - Google Search bar.
+  - Google Apps Launcher.
+  - Sign-in with Google for editing access.
+- **Edit Mode:** Easily add, edit, move, or delete groups and links directly from the UI.
+- **Weather & Clock:** Real-time local time and weather updates.
+- **Branded Groups:** Automatically fetch brand icons for group headers.
+- **Secure:** Optional Google Sign-In protection to prevent unauthorized changes to your layout.
 
-## Deployment (Cloudflare)
+## Tech Stack
 
-This project is a static site (HTML/CSS/JS). The best way to host it on Cloudflare is using **Cloudflare Pages**.
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript.
+- **Hosting:** Cloudflare Pages.
+- **Backend/Storage:** Cloudflare Pages Functions + Cloudflare KV.
 
-### Option 1: Cloudflare Dashboard (Easiest)
-1. Go to the [Cloudflare Dashboard](https://dash.cloudflare.com/).
-2. Navigate to **Pages** > **Create a project** > **Direct Upload**.
-3. Upload this entire folder.
-4. Deploy!
+## Setup & Deployment
 
-### Option 2: Wrangler CLI
-1. Install Wrangler: `npm install -g wrangler`
-2. Run:
-   ```bash
-   wrangler pages deploy . --project-name my-start-page
-   ```
+This project is designed to be deployed to Cloudflare Pages.
 
-## Customization
-- **Styling**: Edit `styles.css` to change colors or layout.
-- **Default Data**: Edit `data.js` to change the initial bookmarks for new users.
+### Prerequisites
 
+1.  A Cloudflare account.
+2.  Node.js and npm installed.
+3.  Wrangler CLI installed (`npm install -g wrangler`).
 
+### 1. Local Development
+
+To run the project locally, you can use Wrangler:
+
+```bash
+npm install
+npx wrangler pages dev .
+```
+
+_Note: For local development to work fully with data persistence, you may need to mock the KV bindings or connect to a preview namespace._
+
+### 2. Cloudflare Pages Deployment
+
+#### Step A: Create the Project
+
+You can deploy directly from your command line:
+
+```bash
+npx wrangler pages deploy . --project-name my-start-page --branch production
+```
+
+#### Step B: Create a KV Namespace
+
+To store your configuration, you need a KV Namespace.
+
+1.  Log in to the Cloudflare Dashboard.
+2.  Go to **Workers & Pages** > **KV**.
+3.  Create a new namespace (e.g., `START_PAGE_KV`).
+
+#### Step C: Bind KV to Pages
+
+1.  Go to your new Pages project settings in the Cloudflare Dashboard.
+2.  Navigate to **Settings** > **Functions**.
+3.  Scroll to **KV Namespace Bindings**.
+4.  Add a new binding:
+    - **Variable name:** `START_PAGE_DATA` (This must be exact).
+    - **KV Namespace:** Select the namespace you created in Step B.
+5.  Save the settings.
+
+#### Step D: Configure Authentication (Optional but Recommended)
+
+To enable editing and syncing, you should configure Google Sign-In.
+
+1.  **Google Cloud Console:**
+
+    - Create a project in the [Google Cloud Console](https://console.cloud.google.com/).
+    - Create OAuth 2.0 Client credentials (Web Application).
+    - Add your Cloudflare Pages URL (e.g., `https://your-project.pages.dev`) to "Authorized JavaScript origins".
+    - Copy the **Client ID**.
+
+2.  **Set Auth Config in KV:**
+    You need to manually create a key in your KV namespace to store these secrets.
+    - Go to **Workers & Pages** > **KV** > Your Namespace.
+    - Click **View** to see keys.
+    - Add a new key-value pair:
+      - **Key:** `authConfig`
+      - **Value:** `{"clientId": "YOUR_GOOGLE_CLIENT_ID", "allowedEmail": "your.email@gmail.com"}`
+    - _Note: `allowedEmail` restricts editing to just your account._
+
+### 3. Usage
+
+1.  Open your deployed site.
+2.  Click the **Settings** (gear) icon.
+3.  Click the Google Sign-In button to authenticate (if configured).
+4.  Once signed in, an **Edit** button (pencil icon) will appear.
+5.  Toggle Edit Mode to add groups, rearrange links, or delete items.
+6.  Changes are automatically saved to the cloud.
+
+## Project Structure
+
+- `index.html`: Main entry point.
+- `styles.css`: All styling.
+- `script.js`: Frontend logic (UI rendering, event listeners).
+- `data.js`: Default fallback data (used if KV is empty).
+- `functions/api/`: Backend logic.
+  - `data.js`: Handles GET/PUT requests to Cloudflare KV.
+
+## License
+
+Personal use.
