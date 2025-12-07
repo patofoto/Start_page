@@ -112,12 +112,20 @@ To enable editing and syncing, you should configure Google Sign-In.
 5.  Toggle Edit Mode to add groups, rearrange links, or delete items.
 6.  Changes are automatically saved to the cloud.
 
+### 4. Data Loading & Persistence
+
+- On page load the client tries `GET /api/data` (Cloudflare KV). If `appData` exists in KV, that is used.
+- If KV is empty or unreachable, it falls back to `localStorage` (`startPageData`).
+- If both KV and `localStorage` are empty, it falls back to `default_data.js` (shipped with the app).
+- Any edits save to both `localStorage` (for fast reloads) and KV (for persistence across deploys).
+- KV content is not overwritten by new deploys; it keeps the last saved data until you clear/replace it.
+
 ## Project Structure
 
 - `index.html`: Main entry point.
 - `styles.css`: All styling.
 - `script.js`: Frontend logic (UI rendering, event listeners).
-- `data.js`: Default fallback data (used if KV is empty).
+- `default_data.js`: Default fallback data (used if KV is empty).
 - `functions/api/`: Backend logic.
   - `data.js`: Handles GET/PUT requests to Cloudflare KV.
 
