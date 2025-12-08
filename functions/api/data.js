@@ -24,10 +24,18 @@ export async function onRequestGet(context) {
                     if (payload.aud === authConfig.clientId) {
                         isAuthorized = true;
                         // If allowedEmail is set, enforce it
-                        if (!authConfig.allowedEmail || payload.email.toLowerCase() === authConfig.allowedEmail.toLowerCase()) {
+                        const allowList = authConfig.allowedEmails && authConfig.allowedEmails.length
+                            ? authConfig.allowedEmails.map(e => e.toLowerCase())
+                            : authConfig.allowedEmail
+                                ? [authConfig.allowedEmail.toLowerCase()]
+                                : [];
+                        const email = (payload.email || '').toLowerCase();
+                        if (!allowList.length || allowList.includes(email)) {
                             includeAllowedEmail = true;
                         } else {
                             isAuthorized = false;
+                            // Fail fast for unauthorized email
+                            return new Response("Unauthorized Email", { status: 403 });
                         }
                     }
                 }
@@ -40,7 +48,10 @@ export async function onRequestGet(context) {
     // If privacy is enabled and user is not authorized, return a minimal payload (no groups/links)
     if (appData && appData.hideWhenLoggedOut && !isAuthorized) {
         const minimal = {
-            authConfig: authConfig ? { clientId: authConfig.clientId } : { clientId: "" },
+            authConfig: authConfig ? { 
+                clientId: authConfig.clientId, 
+                allowedEmails: authConfig.allowedEmails || (authConfig.allowedEmail ? [authConfig.allowedEmail] : [])
+            } : { clientId: "", allowedEmails: [] },
             hideWhenLoggedOut: true,
             layoutMode: appData.layoutMode || "masonry",
             enabledGoogleApps: appData.enabledGoogleApps || [],
@@ -55,9 +66,16 @@ export async function onRequestGet(context) {
     if (appData && authConfig) {
         if (!appData.authConfig) appData.authConfig = {};
         appData.authConfig.clientId = authConfig.clientId;
-        if (includeAllowedEmail) {
-            appData.authConfig.allowedEmail = authConfig.allowedEmail || "";
+        // Expose allowedEmails always (not sensitive) so client can pre-check before showing edit UI
+        if (authConfig.allowedEmails && authConfig.allowedEmails.length) {
+            appData.authConfig.allowedEmails = authConfig.allowedEmails;
+        } else if (authConfig.allowedEmail) {
+            appData.authConfig.allowedEmails = [authConfig.allowedEmail];
         } else {
+            appData.authConfig.allowedEmails = [];
+        }
+        if (!includeAllowedEmail) {
+            // Legacy field cleaned
             delete appData.authConfig.allowedEmail;
         }
     } else if (appData && !appData.authConfig) {
@@ -107,8 +125,13 @@ export async function onRequestPut(context) {
         }
 
         // Check Email (if restricted)
-        if (authConfig.allowedEmail && 
-            payload.email.toLowerCase() !== authConfig.allowedEmail.toLowerCase()) {
+        const email = (payload.email || '').toLowerCase();
+        const allowList = authConfig.allowedEmails && authConfig.allowedEmails.length
+            ? authConfig.allowedEmails.map(e => e.toLowerCase())
+            : authConfig.allowedEmail
+                ? [authConfig.allowedEmail.toLowerCase()]
+                : [];
+        if (allowList.length && !allowList.includes(email)) {
              return new Response("Unauthorized Email", { status: 403 });
         }
     }

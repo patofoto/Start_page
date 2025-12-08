@@ -1,11 +1,19 @@
 export async function onRequestPut(context) {
   try {
-    const { clientId, allowedEmail } = await context.request.json();
+    const { clientId, allowedEmail, allowedEmails } = await context.request.json();
+    
+    // Normalize allowed emails to an array of lowercase strings (support legacy single value)
+    let allowedEmailsArr = [];
+    if (Array.isArray(allowedEmails)) {
+        allowedEmailsArr = allowedEmails.filter(Boolean).map(e => e.toLowerCase());
+    } else if (typeof allowedEmail === 'string' && allowedEmail.trim()) {
+        allowedEmailsArr = [allowedEmail.trim().toLowerCase()];
+    }
     
     // 1. Check if auth is already configured (Security check)
     const currentConfig = await context.env.START_PAGE_DATA.get("authConfig", { type: "json" });
     
-    if (currentConfig && currentConfig.allowedEmail) {
+    if (currentConfig && (currentConfig.allowedEmail || (currentConfig.allowedEmails && currentConfig.allowedEmails.length))) {
         // If configuration exists, require valid authorization to change it
         const authHeader = context.request.headers.get("Authorization");
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -22,8 +30,13 @@ export async function onRequestPut(context) {
         
         const payload = await tokenRes.json();
         
-        // Check against CURRENT allowed email
-        if (payload.email.toLowerCase() !== currentConfig.allowedEmail.toLowerCase()) {
+        const email = (payload.email || '').toLowerCase();
+        const currentAllowed = currentConfig.allowedEmails && currentConfig.allowedEmails.length
+            ? currentConfig.allowedEmails.map(e => e.toLowerCase())
+            : currentConfig.allowedEmail
+                ? [currentConfig.allowedEmail.toLowerCase()]
+                : [];
+        if (currentAllowed.length && !currentAllowed.includes(email)) {
              return new Response("Unauthorized Email", { status: 403 });
         }
         
@@ -34,7 +47,7 @@ export async function onRequestPut(context) {
     }
     
     // 2. Save new config to KV
-    const config = { clientId, allowedEmail };
+    const config = { clientId, allowedEmails: allowedEmailsArr };
     await context.env.START_PAGE_DATA.put("authConfig", JSON.stringify(config));
     
     return new Response(JSON.stringify({ success: true }), {

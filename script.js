@@ -94,6 +94,42 @@ let BRANDFETCH_CLIENT_ID = '';
 
 // Global variable to store auth token
 let googleAuthToken = null;
+let currentUserEmail = null;
+
+function revokeGoogleSession(email) {
+    try {
+        if (window.google && google.accounts && google.accounts.id && email) {
+            google.accounts.id.revoke(email, () => {});
+        }
+    } catch (e) {
+        console.warn("Google revoke failed", e);
+    }
+}
+
+// Toast utility
+function ensureToastContainer() {
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    return container;
+}
+
+function showToast(message, type = 'error', duration = 3500) {
+    const container = ensureToastContainer();
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.add('hide');
+        toast.addEventListener('transitionend', () => toast.remove());
+        // Fallback removal after animation
+        setTimeout(() => toast.remove(), 250);
+    }, duration);
+}
 
 // --- Initialization ---
 async function init() {
@@ -137,6 +173,7 @@ function initGoogleAuth() {
             if (payload.exp * 1000 > Date.now()) {
                 console.log("Restoring session for:", payload.email);
                 googleAuthToken = storedToken;
+                currentUserEmail = payload.email ? payload.email.toLowerCase() : null;
                 updateAuthUI(true);
                 if (payload.picture) updateAccountIcon(payload.picture);
                 refreshDataWithAuth();
@@ -201,7 +238,20 @@ window.handleCredentialResponse = function(response) {
         localStorage.setItem('google_token', response.credential); // Persist session
         
         const payload = parseJwt(response.credential);
+        currentUserEmail = payload.email ? payload.email.toLowerCase() : null;
         console.log("Logged in as:", payload.email);
+        
+        // Client-side pre-check against allowedEmails if present
+        const allowList = (appData.authConfig && appData.authConfig.allowedEmails) ? appData.authConfig.allowedEmails.map(e => e.toLowerCase()) : [];
+        if (allowList.length && (!currentUserEmail || !allowList.includes(currentUserEmail))) {
+            showToast("Unauthorized: Please sign in with an allowed account.");
+            googleAuthToken = null;
+            currentUserEmail = null;
+            localStorage.removeItem('google_token');
+            updateAuthUI(false);
+            revokeGoogleSession(payload.email);
+            return;
+        }
         
         // We don't check allowedEmail here anymore because we don't have it in client appData.
         // We trust the token and let the backend validate actions.
@@ -242,8 +292,15 @@ function updateAuthUI(isSignedIn) {
     const logoutBtn = document.getElementById('logout-btn');
     const signInBtnContainer = document.getElementById('google-signin-btn');
     
+    const canEdit = computeCanEdit(isSignedIn);
+
     if (isSignedIn) {
-        editBtn.classList.remove('hidden');
+        if (canEdit) {
+            editBtn.classList.remove('hidden');
+        } else {
+            editBtn.classList.add('hidden');
+            if (isEditMode) toggleEditMode();
+        }
         logoutBtn.classList.remove('hidden');
         if(signInBtnContainer) signInBtnContainer.style.display = 'none';
     } else {
@@ -257,7 +314,7 @@ function updateAuthUI(isSignedIn) {
             // Re-render button just in case? Not strictly necessary if it persists.
         }
     }
-    updateSettingsVisibility(isSignedIn);
+    updateSettingsVisibility(isSignedIn, canEdit);
     applyLoggedOutPrivacy(isSignedIn);
 }
 
@@ -289,10 +346,11 @@ function logout() {
     }
 }
 
-function updateSettingsVisibility(isSignedIn) {
+function updateSettingsVisibility(isSignedIn, canEditOverride = null) {
     if (!settingsBtn) return;
     const authConfigured = !!(appData && appData.authConfig && appData.authConfig.clientId);
-    const canAccessSettings = !authConfigured || isSignedIn;
+    const canEdit = (canEditOverride !== null) ? canEditOverride : computeCanEdit(isSignedIn);
+    const canAccessSettings = !authConfigured || (isSignedIn && canEdit);
     settingsBtn.classList.toggle('hidden', !canAccessSettings);
 }
 
@@ -340,6 +398,31 @@ function applyLoggedOutPrivacy(isSignedIn) {
     });
 }
 
+function computeCanEdit(isSignedInOverride = null) {
+    const isSignedIn = (isSignedInOverride !== null) ? isSignedInOverride : !!googleAuthToken;
+    if (!isSignedIn) return false;
+    
+    // If no auth configured, open editing
+    const authConfigured = !!(appData && appData.authConfig && appData.authConfig.clientId);
+    if (!authConfigured) return true;
+    
+    // Allowed emails only present when the server authorized us; if not present, deny.
+    const allowList = (appData.authConfig && appData.authConfig.hasOwnProperty('allowedEmails'))
+        ? (appData.authConfig.allowedEmails || []).map(e => e.toLowerCase())
+        : [];
+    
+    // If server did not return allowedEmails, treat as unauthorized.
+    if (!appData.authConfig.hasOwnProperty('allowedEmails')) {
+        return false;
+    }
+    
+    // If allow list is empty, any signed-in user with correct clientId is allowed.
+    if (!allowList.length) return true;
+    
+    const email = currentUserEmail || '';
+    return allowList.includes(email);
+}
+
 async function loadData() {
     try {
         const headers = {};
@@ -368,7 +451,7 @@ async function loadData() {
         loadFromLocalStorage();
     }
     
-    updateSettingsVisibility(!!googleAuthToken);
+    updateSettingsVisibility(!!googleAuthToken, computeCanEdit(!!googleAuthToken));
     applyLoggedOutPrivacy(!!googleAuthToken);
     // Safety: if content was hidden previously, ensure it is shown when signed in
     forceShowContentIfVisibleState();
@@ -390,6 +473,16 @@ async function refreshDataWithAuth() {
         const res = await fetch('/api/data', {
             headers: { Authorization: `Bearer ${googleAuthToken}` }
         });
+        if (res.status === 403) {
+            showToast("Unauthorized: Please sign in with an allowed account.");
+            updateAuthUI(false);
+            googleAuthToken = null;
+            localStorage.removeItem('google_token');
+            revokeGoogleSession(currentUserEmail);
+            currentUserEmail = null;
+            return;
+        }
+
         if (res.ok) {
             const data = await res.json();
             if (data) {
@@ -941,6 +1034,14 @@ function saveGroupOrder() {
 // --- Logic ---
 
 async function saveData() {
+    // Client-side guard: if auth is configured and user isn't allowed, block saves early
+    const authConfigured = !!(appData && appData.authConfig && appData.authConfig.clientId);
+    if (authConfigured && !computeCanEdit()) {
+        showToast("Unauthorized: Please sign in with an allowed account.");
+        updateAuthUI(false);
+        return;
+    }
+
     // Save to LocalStorage as backup/fast access
     localStorage.setItem('startPageData', JSON.stringify(appData));
     
@@ -976,6 +1077,10 @@ async function saveData() {
 }
 
 function toggleEditMode() {
+    if (!computeCanEdit()) {
+        alert("Unauthorized: Please sign in with an allowed account.");
+        return;
+    }
     isEditMode = !isEditMode;
     body.classList.toggle('edit-mode', isEditMode);
     renderGrid();
@@ -1540,9 +1645,10 @@ function openSettingsModal() {
     if (clientIdInput) clientIdInput.value = (appData.authConfig && appData.authConfig.clientId) || '';
     
     if (allowedEmailInput) {
-        // If the server returned allowedEmail (only after auth), show it; otherwise leave empty.
-        allowedEmailInput.value = (appData.authConfig && appData.authConfig.allowedEmail) || '';
-        allowedEmailInput.placeholder = allowedEmailInput.value ? 'Saved email' : 'Saved (Hidden) - Enter new email to update';
+        // If the server returned allowedEmails (only after auth), show comma-separated; otherwise leave empty.
+        const emails = (appData.authConfig && appData.authConfig.allowedEmails) || [];
+        allowedEmailInput.value = emails.join(', ');
+        allowedEmailInput.placeholder = emails.length ? 'Saved emails' : 'Saved (Hidden) - Enter email(s) to update';
     }
 
     if (hideLoggedOutCheckbox) {
@@ -1645,12 +1751,17 @@ function setupEventListeners() {
 
             // Save Auth Settings via separate secure endpoint
             const clientId = document.getElementById('settings-client-id').value.trim();
-            const allowedEmail = document.getElementById('settings-allowed-email').value.trim();
+            const allowedEmailRaw = document.getElementById('settings-allowed-email').value.trim();
             const hideLoggedOut = document.getElementById('settings-hide-loggedout').checked;
 
             appData.hideWhenLoggedOut = hideLoggedOut;
             
-            if (clientId || allowedEmail) {
+            // Split comma-separated emails
+            const allowedEmails = allowedEmailRaw
+                ? allowedEmailRaw.split(',').map(e => e.trim()).filter(Boolean)
+                : [];
+            
+            if (clientId || allowedEmails.length) {
                 // Call Auth Setup Endpoint
                 const authHeaders = { 'Content-Type': 'application/json' };
                 if (googleAuthToken) authHeaders['Authorization'] = `Bearer ${googleAuthToken}`;
@@ -1658,14 +1769,14 @@ function setupEventListeners() {
                 fetch('/api/auth_setup', {
                     method: 'PUT',
                     headers: authHeaders,
-                    body: JSON.stringify({ clientId, allowedEmail })
+                    body: JSON.stringify({ clientId, allowedEmails })
                 }).then(res => {
                     if (!res.ok) alert("Failed to save Auth Config (Unauthorized?)");
                     else {
                         // Update local view of authConfig (Client ID only for init)
                         if (!appData.authConfig) appData.authConfig = {};
                         appData.authConfig.clientId = clientId;
-                        // Do NOT set allowedEmail locally in appData as it's not returned by server
+                        appData.authConfig.allowedEmails = allowedEmails;
                         
                         // Re-init
                         initGoogleAuth();

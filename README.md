@@ -100,8 +100,8 @@ To enable editing and syncing, you should configure Google Sign-In.
     - Click **View** to see keys.
     - Add a new key-value pair:
       - **Key:** `authConfig`
-      - **Value:** `{"clientId": "YOUR_GOOGLE_CLIENT_ID", "allowedEmail": "your.email@gmail.com"}`
-    - _Note: `allowedEmail` restricts editing to just your account._
+      - **Value:** `{"clientId": "YOUR_GOOGLE_CLIENT_ID", "allowedEmails": ["your.email@gmail.com","other@email.com"]}`
+    - _Note: `allowedEmails` is an array. If set, only those addresses can edit._
 
 ### 3. Usage
 
