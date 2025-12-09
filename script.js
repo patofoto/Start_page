@@ -163,7 +163,7 @@ function withBrandfetchCache(url) {
     return url.includes('?') ? `${url}&c=${BRANDFETCH_CLIENT_ID}` : `${url}?c=${BRANDFETCH_CLIENT_ID}`;
 }
 
-function initGoogleAuth() {
+function initGoogleAuth(shouldRefreshData = true) {
     // Check locally stored token first
     const storedToken = localStorage.getItem('google_token');
     if (storedToken) {
@@ -176,7 +176,7 @@ function initGoogleAuth() {
                 currentUserEmail = payload.email ? payload.email.toLowerCase() : null;
                 updateAuthUI(true);
                 if (payload.picture) updateAccountIcon(payload.picture);
-                refreshDataWithAuth();
+                if (shouldRefreshData) refreshDataWithAuth();
         applyLoggedOutPrivacy(true);
             } else {
                 console.log("Session expired");
@@ -1789,7 +1789,7 @@ function setupEventListeners() {
                         appData.authConfig.allowedEmails = allowedEmails;
                         
                         // Re-init
-                        initGoogleAuth();
+                        initGoogleAuth(false);
                     }
                 });
             }
@@ -1810,7 +1810,9 @@ function setupEventListeners() {
             saveData();
             
             // Re-init Auth with new settings
-            initGoogleAuth();
+            // We skip data refresh because we just updated appData manually
+            // initGoogleAuth(false); 
+            
             applyLoggedOutPrivacy(!!googleAuthToken);
             
             closeSettingsModal();
