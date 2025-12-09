@@ -1063,8 +1063,14 @@ async function saveData() {
         
         if (!res.ok) {
             if (res.status === 401 || res.status === 403) {
-                alert("Unauthorized: Please sign in or check permissions.");
-                updateAuthUI(false); // Logout UI
+                showToast("Save blocked: please sign in with an allowed account.", 'error');
+                // Force logout/reset on unauthorized save attempts
+                if (currentUserEmail) revokeGoogleSession(currentUserEmail);
+                googleAuthToken = null;
+                currentUserEmail = null;
+                localStorage.removeItem('google_token');
+                updateAuthUI(false);
+                applyLoggedOutPrivacy(false);
                 return;
             }
             console.error('Failed to save to Cloudflare KV', res.status);
@@ -1601,7 +1607,10 @@ function executeGroupMove(sourceId, targetId) {
 
 // Settings Modal
 function openSettingsModal() {
-    document.getElementById('config-json').value = JSON.stringify(appData, null, 2);
+    // Hide authConfig from the JSON editor to make copy/paste easier
+    const safeData = JSON.parse(JSON.stringify(appData || {}));
+    if (safeData.authConfig) delete safeData.authConfig;
+    document.getElementById('config-json').value = JSON.stringify(safeData, null, 2);
     
     // Layout Mode Selector
     const existingLayoutSelector = document.getElementById('layout-mode-selector');
@@ -1741,6 +1750,7 @@ function setupEventListeners() {
         try {
             // Save JSON Config
             const newData = JSON.parse(document.getElementById('config-json').value);
+            if (newData.authConfig) delete newData.authConfig;
             appData = newData;
             
             // Save Layout Mode
@@ -1795,9 +1805,9 @@ function setupEventListeners() {
                 appData.enabledGoogleApps = enabled;
             }
             
-            saveData();
             renderGrid();
             renderGoogleApps(); // Refresh apps
+            saveData();
             
             // Re-init Auth with new settings
             initGoogleAuth();
