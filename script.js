@@ -1,23 +1,6 @@
 // Initialize data
 let appData = defaultData; // Set initial default, init() will try to load from API
-
-// Helper for animation state
-function getKnownGroups() {
-    try {
-        const stored = localStorage.getItem('known_groups');
-        return new Set(stored ? JSON.parse(stored) : []);
-    } catch (e) {
-        return new Set();
-    }
-}
-
-function saveKnownGroups(ids) {
-    localStorage.setItem('known_groups', JSON.stringify(Array.from(ids)));
-}
-
-function clearKnownGroups() {
-    localStorage.removeItem('known_groups');
-}
+let renderedGroupIds = new Set(); // Track rendered groups to control animation
 
 // Ensure googleApps property exists
 if (!appData.enabledGoogleApps) {
@@ -360,7 +343,7 @@ function logout() {
     // For privacy, clear in-memory data and DOM when hiding on logout
     if (appData.hideWhenLoggedOut) {
         appData.groups = [];
-        clearKnownGroups(); // Reset animation history on logout
+        renderedGroupIds.clear(); // Clear render history so groups animate on next login
         renderGrid();
     }
 }
@@ -737,37 +720,16 @@ function resizeGridItem(item) {
         return;
     }
 
-    const grid = document.getElementById('grid-container');
-    const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
-    const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('gap'));
+    // We hardcode these to match the "gap: 0" (row-gap) strategy in CSS for stability.
+    // In CSS we set row-gap: 0 and grid-auto-rows: 1px for .masonry-mode
+    const rowHeight = 1; 
+    const desiredGap = 20; // The visual gap we want
+
+    // We use offsetHeight instead of getBoundingClientRect().height to avoid transform scaling issues.
+    // Formula: span * rowHeight >= contentHeight + desiredGap
+    // We add a buffer (+5px) for safety.
+    const rowSpan = Math.ceil((item.offsetHeight + desiredGap + 5) / rowHeight);
     
-    // We need to measure the content height including its own padding/border
-    // Since item is the .card, we can just measure its scrollHeight or clientHeight
-    // But we must ensure we are not constrained by a previous grid-row-end
-    
-    // Temporarily unset row-span to get natural height?
-    // Actually, if align-items: start is set, the height should be natural unless constrained.
-    // However, let's measure the children height sum + padding?
-    // Or just measuring item.getBoundingClientRect().height usually works if not expanded.
-    
-    // Better approach: Measure the last child's bottom position relative to the container top
-    // The card has padding and borders.
-    
-    // Let's use a straightforward calculation.
-    // Need to account for the fact that 'gap' is between tracks.
-    
-    // Formula: span = ceil((itemHeight + gap) / (rowHeight + gap))
-    
-    // Clone to measure? No, expensive.
-    // Just measure headers + body.
-    
-    // Let's assume the card's current offsetHeight is correct because of align-self: start.
-    // Note: offsetHeight includes padding and border.
-    
-    // If the item has a large row-span from a previous calculation, does it stretch?
-    // align-items: start prevents stretching, so offsetHeight should be content-based.
-    
-    const rowSpan = Math.ceil((item.getBoundingClientRect().height + rowGap) / (rowHeight + rowGap));
     item.style.gridRowEnd = "span " + rowSpan;
 }
 
@@ -798,23 +760,29 @@ function renderGrid() {
     gridContainer.classList.add(currentMode === 'grid' ? 'grid-mode' : 'masonry-mode');
 
     // Get currently known groups to determine animation
-    const knownGroups = getKnownGroups();
-    const currentRenderIds = new Set(knownGroups); // Start with known, update with current
-
+    // const knownGroups = getKnownGroups(); // Removed localStorage
+    const currentRenderIds = new Set(); // Start fresh tracking for next time (or reuse global if we want strictly add-only)
+    
+    // We want to reuse renderedGroupIds so we know what was ALREADY rendered.
+    // We will update renderedGroupIds at the end or in place.
+    
     appData.groups.forEach((group) => {
         const card = document.createElement('div');
         
         // Only animate if the group ID is NOT in our known history
-        // This ensures it animates once per "lifetime" (until logout)
-        if (!knownGroups.has(group.id)) {
+        // This ensures it animates once per "session" (page load)
+        if (!renderedGroupIds.has(group.id)) {
             card.className = 'card animate-in';
-            // Mark as known for future renders
-            currentRenderIds.add(group.id);
+            // Cleanup animation class after it finishes to ensure clean layout
+            card.addEventListener('animationend', () => {
+                card.classList.remove('animate-in');
+                resizeGridItem(card); // Ensure final layout is correct
+            }, { once: true });
         } else {
             card.className = 'card';
         }
         
-        // Ensure current ID is tracked (in case of re-adds or data sync quirks)
+        // Track for next state
         currentRenderIds.add(group.id);
 
         card.dataset.groupId = group.id;
@@ -996,13 +964,15 @@ function renderGrid() {
     gridContainer.appendChild(addGroupCard);
     resizeObserver.observe(addGroupCard);
     
-    // Save the updated list of known groups
-    saveKnownGroups(currentRenderIds);
+    // Update global set for next render
+    renderedGroupIds = currentRenderIds;
 
     // Initial masonry calculation after render
-    // Use setTimeout to allow DOM reflow
+    // Use setTimeout to allow DOM reflow and font loading
     if (appData.layoutMode === 'masonry') {
-        setTimeout(resizeAllGridItems, 10);
+        resizeAllGridItems(); // Immediate
+        setTimeout(resizeAllGridItems, 50);  // Quick reflow
+        setTimeout(resizeAllGridItems, 500); // Catch slower font/image loads
     } else {
         // Force clear any stuck styles if switching to grid
         const allItems = document.getElementsByClassName("card");

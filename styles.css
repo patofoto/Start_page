@@ -354,6 +354,8 @@ header {
 .grid-container.masonry-mode {
     align-items: start !important;
     grid-auto-rows: 1px !important; /* Enable masonry-like row sizing */
+    row-gap: 0 !important; /* Disable vertical gap for manual calculation to avoid grid quirks */
+    column-gap: 20px !important; /* Keep horizontal gap */
 }
 
 .grid-container.grid-mode {
