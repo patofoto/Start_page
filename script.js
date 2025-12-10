@@ -21,6 +21,11 @@ if (typeof appData.hideWhenLoggedOut === 'undefined') {
     appData.hideWhenLoggedOut = true; // default to hiding when logged out for privacy
 }
 
+// Ensure link open behavior exists
+if (typeof appData.openLinksInNewTab === 'undefined') {
+    appData.openLinksInNewTab = true; // default to opening links in a new tab
+}
+
 function ensurePrivacyDefaults() {
     if (typeof appData.hideWhenLoggedOut === 'undefined') {
         appData.hideWhenLoggedOut = true;
@@ -532,7 +537,7 @@ function renderGoogleApps() {
         if (enabledApps.includes(app.name)) {
             const a = document.createElement('a');
             a.href = app.url;
-            a.target = "_blank";
+            a.target = getLinkTarget();
             a.className = 'app-item';
             
             const iconStyle = withBrandfetchCache(app.iconStyle);
@@ -572,6 +577,12 @@ function ensureProtocol(url) {
     }
 
     return 'https://' + url;
+}
+
+// Helper to determine target for links based on settings
+function getLinkTarget() {
+    // Default behavior is to open in a new tab; explicit false means same tab
+    return appData && appData.openLinksInNewTab === false ? '_self' : '_blank';
 }
 
 // Helper to apply brand styling
@@ -886,7 +897,7 @@ function renderGrid() {
                             const a = document.createElement('a');
                             a.className = 'link-item';
                             a.href = isEditMode ? '#' : ensureProtocol(subLink.url);
-                            a.target = "_blank";
+                            a.target = getLinkTarget();
                             if (isEditMode) a.addEventListener('click', (e) => e.preventDefault());
 
                             // Icon logic
@@ -926,7 +937,7 @@ function renderGrid() {
                     const a = document.createElement('a');
                     a.className = 'link-item';
                     a.href = isEditMode ? '#' : ensureProtocol(link.url);
-                    a.target = "_blank"; 
+                    a.target = getLinkTarget(); 
                     
                     if (isEditMode) {
                         a.addEventListener('click', (e) => e.preventDefault());
@@ -1621,13 +1632,14 @@ function openSettingsModal() {
     if (safeData.authConfig) delete safeData.authConfig;
     document.getElementById('config-json').value = JSON.stringify(safeData, null, 2);
     
+    // Layout & Link Behavior Selectors
+    const settingsContent = document.querySelector('#settings-modal .modal-content');
+    const actionsDiv = document.querySelector('#settings-modal .modal-actions');
+
     // Layout Mode Selector
     const existingLayoutSelector = document.getElementById('layout-mode-selector');
     if (!existingLayoutSelector) {
         // Create layout selector if it doesn't exist
-        const settingsContent = document.querySelector('#settings-modal .modal-content');
-        const actionsDiv = document.querySelector('#settings-modal .modal-actions');
-        
         const layoutContainer = document.createElement('div');
         layoutContainer.id = 'layout-mode-selector';
         layoutContainer.style.marginBottom = '20px';
@@ -1652,6 +1664,32 @@ function openSettingsModal() {
         const radios = existingLayoutSelector.querySelectorAll('input[type="radio"]');
         radios.forEach(r => r.checked = r.value === appData.layoutMode);
     }
+
+    // Link Behavior Selector
+    let linkBehaviorSelector = document.getElementById('link-behavior-selector');
+    const openInNewTab = !(appData && appData.openLinksInNewTab === false); // default true
+    if (!linkBehaviorSelector) {
+        linkBehaviorSelector = document.createElement('div');
+        linkBehaviorSelector.id = 'link-behavior-selector';
+        linkBehaviorSelector.style.marginBottom = '20px';
+        settingsContent.insertBefore(linkBehaviorSelector, actionsDiv);
+    }
+    linkBehaviorSelector.innerHTML = `
+        <h4 style="border-bottom: 1px solid #eee; padding-bottom: 5px;">Link Behavior</h4>
+        <div style="display: flex; gap: 20px; margin-top: 10px;">
+            <label style="display: flex; align-items: center; cursor: pointer;">
+                <input type="radio" name="link-behavior" value="new-tab" ${openInNewTab ? 'checked' : ''} style="width: auto; margin-right: 8px;">
+                Open links in a new tab
+            </label>
+            <label style="display: flex; align-items: center; cursor: pointer;">
+                <input type="radio" name="link-behavior" value="same-tab" ${!openInNewTab ? 'checked' : ''} style="width: auto; margin-right: 8px;">
+                Open links in the same tab
+            </label>
+        </div>
+        <p style="font-size: 0.8em; color: #666; margin-top: 8px;">
+            Applies to cards, lists, Google apps, and search results.
+        </p>
+    `;
 
     // Auth Settings
     // Note: We can only populate Client ID if it was returned by the server. 
@@ -1802,6 +1840,16 @@ function setupEventListeners() {
             layoutRadios.forEach(r => {
                 if (r.checked) appData.layoutMode = r.value;
             });
+
+            // Save Link Behavior
+            const linkBehaviorRadios = document.querySelectorAll('input[name="link-behavior"]');
+            let openInNewTab = true;
+            linkBehaviorRadios.forEach(r => {
+                if (r.checked) {
+                    openInNewTab = (r.value === 'new-tab');
+                }
+            });
+            appData.openLinksInNewTab = openInNewTab;
 
             // Save Auth Settings via separate secure endpoint
             const clientId = document.getElementById('settings-client-id').value.trim();
@@ -2016,7 +2064,8 @@ if(searchInput) {
         if (e.key === 'Enter') {
             const query = searchInput.value;
             if(query) {
-                window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+                const target = getLinkTarget();
+                window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, target);
                 searchInput.value = '';
             }
         }

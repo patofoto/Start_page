@@ -991,6 +991,7 @@ const defaultData = {
   ],
   "layoutMode": "masonry",
   "hideWhenLoggedOut": true,
+  "openLinksInNewTab": false,
   "authConfig": {
     "clientId": "",
     "allowedEmail": ""
