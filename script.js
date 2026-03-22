@@ -37,6 +37,18 @@ if (!appData.authConfig) {
     appData.authConfig = { configured: false };
 }
 
+// Preset wallpapers
+const PRESET_WALLPAPERS = [
+    { id: 'warm-nature', name: 'Warm Nature', url: 'https://images.unsplash.com/photo-1460500063983-994d4c27756c?w=1920&q=80' },
+    { id: 'dark-ocean', name: 'Dark Ocean', url: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1920&q=80' },
+    { id: 'mountains', name: 'Mountains', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80' },
+    { id: 'twilight', name: 'Twilight', url: 'https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=1920&q=80' },
+    { id: 'forest', name: 'Forest', url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=80' },
+];
+
+// Track selected wallpaper in settings
+let selectedWallpaperUrl = null;
+
 // Remove deprecated apps from enabledGoogleApps
 const APPS_TO_REMOVE = ["Search", "News", "Chat", "Contacts", "Photos", "Voice", "Shopping", "Keep", "Forms"];
 function cleanupApps() {
@@ -156,12 +168,19 @@ function showToast(message, type = 'error', duration = 3500) {
 async function init() {
     await loadConfig();
     await loadData();
+    applyBackground();
     startClock();
     fetchWeather();
     setupEventListeners();
-    
+
     // Initialize cookie-based auth
     await initAuth();
+}
+
+function applyBackground() {
+    if (appData.backgroundUrl) {
+        document.body.style.backgroundImage = `url('${appData.backgroundUrl}')`;
+    }
 }
 
 // Fetch config on init
@@ -1586,112 +1605,121 @@ function executeGroupMove(sourceId, targetId) {
 
 // Settings Modal
 function openSettingsModal() {
-    // Hide authConfig from the JSON editor to make copy/paste easier
-    const safeData = JSON.parse(JSON.stringify(appData || {}));
-    if (safeData.authConfig) delete safeData.authConfig;
-    document.getElementById('config-json').value = JSON.stringify(safeData, null, 2);
-    
-    // Layout & Link Behavior Selectors
-    const settingsContent = document.querySelector('#settings-modal .modal-content');
-    const actionsDiv = document.querySelector('#settings-modal .modal-actions');
+    // --- Appearance tab ---
+    // Wallpaper picker
+    selectedWallpaperUrl = appData.backgroundUrl || PRESET_WALLPAPERS[0].url;
+    renderWallpaperGrid();
 
-    // Layout Mode Selector
-    const existingLayoutSelector = document.getElementById('layout-mode-selector');
-    if (!existingLayoutSelector) {
-        // Create layout selector if it doesn't exist
-        const layoutContainer = document.createElement('div');
-        layoutContainer.id = 'layout-mode-selector';
-        layoutContainer.style.marginBottom = '20px';
-        layoutContainer.innerHTML = `
-            <h4 style="border-bottom: 1px solid #eee; padding-bottom: 5px;">Layout Mode</h4>
-            <div style="display: flex; gap: 20px; margin-top: 10px;">
-                <label style="display: flex; align-items: center; cursor: pointer;">
-                    <input type="radio" name="layout-mode" value="masonry" ${appData.layoutMode === 'masonry' ? 'checked' : ''} style="width: auto; margin-right: 8px;">
-                    Masonry (Compact)
-                </label>
-                <label style="display: flex; align-items: center; cursor: pointer;">
-                    <input type="radio" name="layout-mode" value="grid" ${appData.layoutMode === 'grid' ? 'checked' : ''} style="width: auto; margin-right: 8px;">
-                    Grid (Equal Height)
-                </label>
-            </div>
-        `;
-        
-        // Insert before the actions
-        settingsContent.insertBefore(layoutContainer, actionsDiv);
-    } else {
-        // Update checked state
-        const radios = existingLayoutSelector.querySelectorAll('input[type="radio"]');
-        radios.forEach(r => r.checked = r.value === appData.layoutMode);
-    }
+    // Layout radios
+    const layoutRadios = document.querySelectorAll('input[name="layout-mode"]');
+    layoutRadios.forEach(r => r.checked = r.value === (appData.layoutMode || 'masonry'));
 
-    // Link Behavior Selector
-    let linkBehaviorSelector = document.getElementById('link-behavior-selector');
-    const openInNewTab = !(appData && appData.openLinksInNewTab === false); // default true
-    if (!linkBehaviorSelector) {
-        linkBehaviorSelector = document.createElement('div');
-        linkBehaviorSelector.id = 'link-behavior-selector';
-        linkBehaviorSelector.style.marginBottom = '20px';
-        settingsContent.insertBefore(linkBehaviorSelector, actionsDiv);
-    }
-    linkBehaviorSelector.innerHTML = `
-        <h4 style="border-bottom: 1px solid #eee; padding-bottom: 5px;">Link Behavior</h4>
-        <div style="display: flex; gap: 20px; margin-top: 10px;">
-            <label style="display: flex; align-items: center; cursor: pointer;">
-                <input type="radio" name="link-behavior" value="new-tab" ${openInNewTab ? 'checked' : ''} style="width: auto; margin-right: 8px;">
-                Open links in a new tab
-            </label>
-            <label style="display: flex; align-items: center; cursor: pointer;">
-                <input type="radio" name="link-behavior" value="same-tab" ${!openInNewTab ? 'checked' : ''} style="width: auto; margin-right: 8px;">
-                Open links in the same tab
-            </label>
-        </div>
-        <p style="font-size: 0.8em; color: #666; margin-top: 8px;">
-            Applies to cards, lists, Google apps, and search results.
-        </p>
-    `;
+    // Link behavior radios
+    const openInNewTab = !(appData && appData.openLinksInNewTab === false);
+    const linkRadios = document.querySelectorAll('input[name="link-behavior"]');
+    linkRadios.forEach(r => r.checked = r.value === (openInNewTab ? 'new-tab' : 'same-tab'));
 
-    // Auth Settings
-    const allowedEmailInput = document.getElementById('settings-allowed-email');
-    const hideLoggedOutCheckbox = document.getElementById('settings-hide-loggedout');
-
-    if (allowedEmailInput) {
-        // If the server returned allowedEmails (only after auth), show comma-separated; otherwise leave empty.
-        const emails = (appData.authConfig && appData.authConfig.allowedEmails) || [];
-        allowedEmailInput.value = emails.join(', ');
-        allowedEmailInput.placeholder = emails.length ? 'Saved emails' : 'Saved (Hidden) - Enter email(s) to update';
-    }
-
-    if (hideLoggedOutCheckbox) {
-        hideLoggedOutCheckbox.checked = !!appData.hideWhenLoggedOut;
-    }
-
-    // Render Google Apps Toggles
+    // --- Google Apps tab ---
     const container = document.getElementById('google-apps-toggles');
     if (container) {
         container.innerHTML = '';
         const enabledApps = appData.enabledGoogleApps || [];
-        
         googleAppsConfig.forEach(app => {
             const label = document.createElement('label');
-            label.className = 'checkbox-label';
-            label.style.display = 'flex';
-            label.style.alignItems = 'center';
-            label.style.margin = '5px 0';
-            
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.checked = enabledApps.includes(app.name);
             checkbox.value = app.name;
-            checkbox.style.marginRight = '10px';
-            checkbox.style.width = 'auto'; // Override specific style
-            
             label.appendChild(checkbox);
             label.appendChild(document.createTextNode(app.name));
             container.appendChild(label);
         });
     }
-    
+
+    // --- Account tab ---
+    const allowedEmailInput = document.getElementById('settings-allowed-email');
+    const hideLoggedOutCheckbox = document.getElementById('settings-hide-loggedout');
+    if (allowedEmailInput) {
+        const emails = (appData.authConfig && appData.authConfig.allowedEmails) || [];
+        allowedEmailInput.value = emails.join(', ');
+        allowedEmailInput.placeholder = emails.length ? 'Saved emails' : 'Saved (Hidden) - Enter email(s) to update';
+    }
+    if (hideLoggedOutCheckbox) {
+        hideLoggedOutCheckbox.checked = !!appData.hideWhenLoggedOut;
+    }
+
+    // --- Data tab ---
+    const safeData = JSON.parse(JSON.stringify(appData || {}));
+    if (safeData.authConfig) delete safeData.authConfig;
+    document.getElementById('config-json').value = JSON.stringify(safeData, null, 2);
+
+    // Show first tab
+    switchSettingsTab('appearance');
     settingsModal.classList.remove('hidden');
+}
+
+function switchSettingsTab(tabName) {
+    document.querySelectorAll('.settings-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tabName);
+    });
+    document.querySelectorAll('.settings-tab-content').forEach(c => {
+        c.classList.toggle('active', c.dataset.tab === tabName);
+    });
+}
+
+function renderWallpaperGrid() {
+    const grid = document.getElementById('wallpaper-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const currentUrl = selectedWallpaperUrl;
+    let isCustom = true;
+
+    PRESET_WALLPAPERS.forEach(wp => {
+        const isSelected = currentUrl === wp.url;
+        if (isSelected) isCustom = false;
+
+        const thumb = document.createElement('div');
+        thumb.className = 'wallpaper-thumb' + (isSelected ? ' selected' : '');
+        thumb.innerHTML = `
+            <img src="${wp.url}" alt="${wp.name}" loading="lazy">
+            <div class="wp-check">✓</div>
+            <div class="wp-name">${wp.name}</div>
+        `;
+        thumb.addEventListener('click', () => {
+            selectedWallpaperUrl = wp.url;
+            document.getElementById('custom-url-input').style.display = 'none';
+            renderWallpaperGrid();
+            // Live preview
+            document.body.style.backgroundImage = `url('${wp.url}')`;
+        });
+        grid.appendChild(thumb);
+    });
+
+    // Custom URL tile
+    const customThumb = document.createElement('div');
+    customThumb.className = 'wallpaper-thumb' + (isCustom ? ' selected' : '');
+    customThumb.innerHTML = `
+        <div class="wallpaper-thumb-custom"><span>+</span></div>
+        <div class="wp-check">✓</div>
+        <div class="wp-name">Custom URL</div>
+    `;
+    customThumb.addEventListener('click', () => {
+        const urlRow = document.getElementById('custom-url-input');
+        urlRow.style.display = 'flex';
+        const urlInput = document.getElementById('wallpaper-custom-url');
+        if (isCustom && currentUrl) {
+            urlInput.value = currentUrl;
+        }
+        urlInput.focus();
+    });
+    grid.appendChild(customThumb);
+
+    // Pre-fill custom URL if active
+    if (isCustom && currentUrl) {
+        document.getElementById('custom-url-input').style.display = 'flex';
+        document.getElementById('wallpaper-custom-url').value = currentUrl;
+    }
 }
 
 function closeSettingsModal() {
@@ -1745,7 +1773,21 @@ function setupEventListeners() {
         }
     });
 
-    // Settings Modal
+    // Settings Modal — tab switching
+    document.querySelectorAll('.settings-tab').forEach(tab => {
+        tab.addEventListener('click', () => switchSettingsTab(tab.dataset.tab));
+    });
+
+    // Custom wallpaper URL apply
+    document.getElementById('apply-custom-url').addEventListener('click', () => {
+        const url = document.getElementById('wallpaper-custom-url').value.trim();
+        if (url) {
+            selectedWallpaperUrl = url;
+            renderWallpaperGrid();
+            document.body.style.backgroundImage = `url('${url}')`;
+        }
+    });
+
     document.getElementById('close-settings').addEventListener('click', closeSettingsModal);
     document.getElementById('copy-json-btn').addEventListener('click', (e) => {
         e.preventDefault();
@@ -1804,6 +1846,9 @@ function setupEventListeners() {
                 }
             });
             appData.openLinksInNewTab = openInNewTab;
+
+            // Save wallpaper
+            appData.backgroundUrl = selectedWallpaperUrl;
 
             // Save Auth Settings via separate secure endpoint
             const allowedEmailRaw = document.getElementById('settings-allowed-email').value.trim();
