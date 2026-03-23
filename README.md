@@ -26,18 +26,24 @@ No frameworks. No build step. Just HTML, CSS, and JavaScript.
 
 ---
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/csullivan145/Start_page)
-
 ## Quick Start (5 minutes)
 
 You need a free [Cloudflare account](https://dash.cloudflare.com/sign-up) and [Node.js](https://nodejs.org/) installed.
 
-### Option A: One-Command Setup
+### Step 1: Fork & Clone
+
+1. Click **Fork** at the top of this page (this keeps you connected for future updates)
+2. Clone your fork:
 
 ```bash
-git clone https://github.com/csullivan145/Start_page.git
+git clone https://github.com/YOUR_USERNAME/Start_page.git
 cd Start_page
 npm install
+```
+
+### Step 2: Deploy
+
+```bash
 npm run setup
 ```
 
@@ -47,48 +53,22 @@ The setup script will:
 - Ask how you want to sign in (password or Google)
 - Deploy to Cloudflare Workers
 
-### Option B: Deploy Button
+### Step 3: First Visit
 
-Click the **Deploy to Cloudflare Workers** button above. On the deploy form:
-- Check **"Create private Git repository"** (recommended)
-- Select your Git account and create the KV namespace
-- **Leave GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET blank** (they're optional — you can set up Google Sign-In later through the setup wizard)
-- Click **Create and deploy**
-
-After it deploys, visit your new Workers URL and the setup wizard will walk you through the rest.
-
-### Option C: Manual Setup
-
-```bash
-git clone https://github.com/csullivan145/Start_page.git
-cd Start_page
-npm install
-npx wrangler login
-npx wrangler kv namespace create START_PAGE_DATA
-```
-
-Copy the KV namespace `id` from the output into `wrangler.toml`:
-
-```toml
-[[kv_namespaces]]
-binding = "START_PAGE_DATA"
-id = "paste-your-id-here"
-```
-
-Then deploy:
-
-```bash
-npm run deploy
-```
-
-### First Visit
-
-After deploying, visit your Workers URL. A setup wizard will guide you through choosing an auth method:
+Visit your Workers URL (shown after deploy). A setup wizard will guide you:
 
 - **Password** (simplest) — Just pick a password. No external setup needed.
 - **Google Sign-In** — Uses Google OAuth. The wizard shows you exactly what to configure, including your auto-detected redirect URI.
 
 That's it. Start adding your links.
+
+### Getting Updates
+
+When new features are released, sync your fork on GitHub:
+
+1. Go to your fork on GitHub
+2. Click **"Sync fork"** → **"Update branch"**
+3. Pull locally and redeploy: `git pull && npm run deploy`
 
 ---
 
