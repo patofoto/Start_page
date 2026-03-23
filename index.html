@@ -94,6 +94,17 @@
                         <button type="button" id="clear-header-color" class="color-clear-btn" title="Remove color">✕</button>
                     </div>
                 </div>
+                <div class="section-row">
+                    <select id="edit-group-section" class="section-select">
+                        <option value="">No Section</option>
+                    </select>
+                    <button type="button" id="new-section-btn" class="section-new-btn">+</button>
+                </div>
+                <div id="new-section-input-row" class="section-input-row" style="display:none;">
+                    <input type="text" id="new-section-name" class="section-name-input" placeholder="Section name">
+                    <button type="button" id="confirm-new-section" class="section-confirm-btn">Add</button>
+                    <button type="button" id="cancel-new-section" class="section-cancel-btn">✕</button>
+                </div>
             </div>
             <div class="panel-scroll">
                 <div id="group-links-container"></div>
@@ -177,6 +188,12 @@
                             <select id="settings-link-weight" class="settings-select settings-select-sm"></select>
                         </div>
                     </div>
+
+                    <div class="settings-section-label" style="margin-top:24px;">Sections</div>
+                    <div id="sections-manager" class="sections-manager">
+                        <!-- Section rows injected by JS -->
+                    </div>
+                    <button type="button" id="add-section-settings-btn" class="btn btn-secondary" style="margin-top:8px;width:100%;font-size:0.8em;">+ Add Section</button>
 
                     <div class="settings-section-label" style="margin-top:24px;">Links</div>
                     <div class="settings-radio-group">

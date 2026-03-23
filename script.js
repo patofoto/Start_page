@@ -64,6 +64,85 @@ const PRESET_WALLPAPERS = [
     { id: 'forest', name: 'Forest', url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=80' },
 ];
 
+// Section color palette for auto-assignment
+const SECTION_COLORS = [
+    'rgba(0, 122, 255, 0.35)',   // blue
+    'rgba(52, 199, 89, 0.35)',   // green
+    'rgba(255, 149, 0, 0.35)',   // orange
+    'rgba(175, 82, 222, 0.35)',  // purple
+    'rgba(255, 59, 48, 0.30)',   // red
+    'rgba(0, 199, 190, 0.35)',   // teal
+    'rgba(255, 204, 0, 0.30)',   // yellow
+    'rgba(88, 86, 214, 0.35)',   // indigo
+];
+
+function ensureSections() {
+    if (!appData.sections) appData.sections = [];
+}
+
+function getSectionColor(sectionId) {
+    ensureSections();
+    const idx = appData.sections.findIndex(s => s.id === sectionId);
+    if (idx < 0) return SECTION_COLORS[0];
+    const section = appData.sections[idx];
+    // Use custom color if set, otherwise palette
+    if (section.color) return section.color;
+    return SECTION_COLORS[idx % SECTION_COLORS.length];
+}
+
+function renderSectionsManager() {
+    ensureSections();
+    const mgr = document.getElementById('sections-manager');
+    if (!mgr) return;
+    mgr.innerHTML = '';
+
+    appData.sections.forEach((section, idx) => {
+        const row = document.createElement('div');
+        row.className = 'section-manager-row';
+
+        // Color from palette based on index
+        const paletteColor = SECTION_COLORS[idx % SECTION_COLORS.length];
+        // Extract rgb for the color picker — convert rgba to hex
+        const match = paletteColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        const hexColor = section.customColor || (match
+            ? '#' + [match[1], match[2], match[3]].map(n => parseInt(n).toString(16).padStart(2, '0')).join('')
+            : '#007aff');
+
+        row.innerHTML = `
+            <input type="color" value="${hexColor}" data-section-id="${section.id}">
+            <input type="text" value="${section.name}" data-section-id="${section.id}">
+            <button type="button" class="section-manager-delete" data-section-id="${section.id}" title="Delete section"><i class="fas fa-trash"></i></button>
+        `;
+
+        // Live edit name
+        row.querySelector('input[type="text"]').addEventListener('input', (e) => {
+            section.name = e.target.value;
+        });
+
+        // Color change
+        row.querySelector('input[type="color"]').addEventListener('input', (e) => {
+            const hex = e.target.value;
+            const r = parseInt(hex.slice(1,3), 16);
+            const g = parseInt(hex.slice(3,5), 16);
+            const b = parseInt(hex.slice(5,7), 16);
+            section.customColor = hex;
+            section.color = `rgba(${r}, ${g}, ${b}, 0.35)`;
+        });
+
+        // Delete
+        row.querySelector('.section-manager-delete').addEventListener('click', () => {
+            // Remove section from all groups
+            appData.groups.forEach(group => {
+                if (group.sectionId === section.id) group.sectionId = null;
+            });
+            appData.sections = appData.sections.filter(s => s.id !== section.id);
+            renderSectionsManager();
+        });
+
+        mgr.appendChild(row);
+    });
+}
+
 // Track selected wallpaper in settings
 let selectedWallpaperUrl = null;
 
@@ -813,17 +892,31 @@ function renderGrid() {
     // We want to reuse renderedGroupIds so we know what was ALREADY rendered.
     // We will update renderedGroupIds at the end or in place.
     
-    appData.groups.forEach((group) => {
+    // Sort groups: sectioned groups first (grouped by section), then ungrouped
+    const sortedGroups = [...appData.groups].sort((a, b) => {
+        const aSection = a.sectionId || '';
+        const bSection = b.sectionId || '';
+        if (aSection && !bSection) return -1;
+        if (!aSection && bSection) return 1;
+        if (aSection && bSection && aSection !== bSection) {
+            // Sort by section order
+            ensureSections();
+            const aIdx = appData.sections.findIndex(s => s.id === aSection);
+            const bIdx = appData.sections.findIndex(s => s.id === bSection);
+            return aIdx - bIdx;
+        }
+        return 0;
+    });
+
+    sortedGroups.forEach((group) => {
         const card = document.createElement('div');
-        
+
         // Only animate if the group ID is NOT in our known history
-        // This ensures it animates once per "session" (page load)
         if (!renderedGroupIds.has(group.id)) {
             card.className = 'card animate-in';
-            // Cleanup animation class after it finishes to ensure clean layout
             card.addEventListener('animationend', () => {
                 card.classList.remove('animate-in');
-                resizeGridItem(card); // Ensure final layout is correct
+                resizeGridItem(card);
             }, { once: true });
         } else {
             card.className = 'card';
@@ -998,6 +1091,14 @@ function renderGrid() {
                     body.appendChild(a);
                 }
             });
+        }
+
+        // Apply section tint
+        if (group.sectionId) {
+            const tint = getSectionColor(group.sectionId);
+            card.classList.add('section-tinted');
+            card.style.setProperty('--section-tint', tint);
+            card.dataset.sectionId = group.sectionId;
         }
 
         card.appendChild(header);
@@ -1245,6 +1346,18 @@ function openEditGroupModal(groupId) {
     clearColorBtn.onclick = () => {
         colorInput.value = '#333333';
     };
+
+    // Section dropdown
+    ensureSections();
+    const sectionSelect = document.getElementById('edit-group-section');
+    sectionSelect.innerHTML = '<option value="">No Section</option>';
+    appData.sections.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.name;
+        sectionSelect.appendChild(opt);
+    });
+    sectionSelect.value = group.sectionId || '';
 
     const container = document.getElementById('group-links-container');
     container.innerHTML = '';
@@ -1571,6 +1684,7 @@ async function saveGroupEdit() {
             appData.groups[groupIndex].brandUrl = brandUrl;
             appData.groups[groupIndex].brandData = brandData;
             appData.groups[groupIndex].headerColor = headerColor;
+            appData.groups[groupIndex].sectionId = document.getElementById('edit-group-section').value || null;
             
             saveData();
             renderGrid();
@@ -1727,6 +1841,9 @@ function openSettingsModal() {
     document.getElementById('settings-date-weight').value = typo.dateWeight || '400';
     document.getElementById('settings-link-font').value = typo.linkFont || defaultFont;
     document.getElementById('settings-link-weight').value = typo.linkWeight || '400';
+
+    // Sections manager
+    renderSectionsManager();
 
     // --- Google Apps tab ---
     const container = document.getElementById('google-apps-toggles');
@@ -1885,6 +2002,45 @@ function setupEventListeners() {
     // Group Edit Modal
     document.getElementById('cancel-group-edit').addEventListener('click', closeEditGroupModal);
     document.getElementById('save-group-edit').addEventListener('click', saveGroupEdit);
+
+    // New section — show inline input
+    const newSectionBtn = document.getElementById('new-section-btn');
+    const newSectionRow = document.getElementById('new-section-input-row');
+    const newSectionInput = document.getElementById('new-section-name');
+    const confirmNewSection = document.getElementById('confirm-new-section');
+    const cancelNewSection = document.getElementById('cancel-new-section');
+
+    newSectionBtn.addEventListener('click', () => {
+        newSectionRow.style.display = 'flex';
+        newSectionInput.value = '';
+        newSectionInput.focus();
+    });
+
+    cancelNewSection.addEventListener('click', () => {
+        newSectionRow.style.display = 'none';
+    });
+
+    const addNewSection = () => {
+        const name = newSectionInput.value.trim();
+        if (!name) return;
+        ensureSections();
+        const id = 's' + Date.now();
+        const colorIdx = appData.sections.length % SECTION_COLORS.length;
+        appData.sections.push({ id, name, color: SECTION_COLORS[colorIdx] });
+        const sectionSelect = document.getElementById('edit-group-section');
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = name;
+        sectionSelect.appendChild(opt);
+        sectionSelect.value = id;
+        newSectionRow.style.display = 'none';
+    };
+
+    confirmNewSection.addEventListener('click', addNewSection);
+    newSectionInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); addNewSection(); }
+        if (e.key === 'Escape') { newSectionRow.style.display = 'none'; }
+    });
     document.getElementById('add-link-row-btn').addEventListener('click', () => addLinkRow());
     
     // Move Group Button
@@ -1931,6 +2087,22 @@ function setupEventListeners() {
         }
     });
 
+    // Add section from settings
+    document.getElementById('add-section-settings-btn').addEventListener('click', () => {
+        ensureSections();
+        const id = 's' + Date.now();
+        const colorIdx = appData.sections.length % SECTION_COLORS.length;
+        appData.sections.push({ id, name: 'New Section', color: SECTION_COLORS[colorIdx] });
+        renderSectionsManager();
+        // Focus the new name input
+        const rows = document.querySelectorAll('.section-manager-row');
+        const lastRow = rows[rows.length - 1];
+        if (lastRow) {
+            const nameInput = lastRow.querySelector('input[type="text"]');
+            if (nameInput) { nameInput.focus(); nameInput.select(); }
+        }
+    });
+
     document.getElementById('close-settings').addEventListener('click', closeSettingsModal);
     // Export JSON — download as file
     document.getElementById('export-json-btn').addEventListener('click', () => {
@@ -1969,11 +2141,17 @@ function setupEventListeners() {
 
     document.getElementById('save-settings').addEventListener('click', () => {
         try {
+            // Preserve sections before JSON overwrite (they're edited live in memory)
+            const currentSections = appData.sections ? [...appData.sections] : [];
+
             // Save JSON Config
             const newData = JSON.parse(document.getElementById('config-json').value);
             if (newData.authConfig) delete newData.authConfig;
             appData = newData;
-            
+
+            // Restore sections (settings manager edits take priority over JSON textarea)
+            appData.sections = currentSections;
+
             // Save Layout Mode
             const layoutRadios = document.querySelectorAll('input[name="layout-mode"]');
             layoutRadios.forEach(r => {

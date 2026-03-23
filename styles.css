@@ -68,14 +68,16 @@ header {
     font-weight: 200;
     line-height: 1;
     letter-spacing: -2px;
-    text-shadow: 0 1px 8px rgba(0,0,0,0.15);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
     margin-bottom: 0;
+    color: #fff;
 }
 
 .date-display {
     font-size: 0.95em;
     font-weight: 400;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.3);
     margin-bottom: 8px;
 }
 
@@ -84,7 +86,8 @@ header {
     align-items: center;
     gap: 6px;
     font-size: 0.9em;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.3);
     width: fit-content;
 }
 
@@ -514,6 +517,22 @@ header {
     }
 }
 
+/* Section tint overlay — sits on top of glass backdrop */
+.card.section-tinted::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: var(--section-tint);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.card.section-tinted > * {
+    position: relative;
+    z-index: 1;
+}
+
 .card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
@@ -527,7 +546,8 @@ header {
 
 .card-header {
     background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.2);
     padding: 14px 18px 12px;
     font-family: var(--font-heading);
     font-weight: 600;
@@ -586,14 +606,19 @@ header {
 
 /* Group Handle */
 .group-handle {
-    display: none !important;
     cursor: grab;
-    color: rgba(255,255,255,0.5);
-    margin-right: 10px;
+    color: rgba(255,255,255,0.7);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    width: 0;
+    overflow: hidden;
+    margin: 0;
+    transition: width 0.15s, margin 0.15s;
 }
 
 body.edit-mode .group-handle {
-    display: inline-block !important;
+    width: auto;
+    overflow: visible;
+    margin-right: 10px;
 }
 
 .group-handle:hover {
@@ -613,7 +638,8 @@ body.edit-mode .group-handle {
     background-color: transparent;
     border-radius: 10px;
     text-decoration: none;
-    color: var(--text-color);
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.2);
     font-family: var(--link-font, inherit);
     font-size: 0.88em;
     font-weight: var(--link-weight, 400);
@@ -645,26 +671,28 @@ i.link-icon {
 
 /* Header Actions */
 .header-actions {
-    display: none;
+    display: flex;
     gap: 10px;
+    visibility: hidden;
 }
 
 body.edit-mode .header-actions {
-    display: flex;
+    visibility: visible;
 }
 
 .header-btn {
     cursor: pointer;
-    color: var(--text-tertiary);
+    color: rgba(255, 255, 255, 0.7);
     transition: all 0.12s;
     font-size: 0.75em;
-    padding: 4px;
+    padding: 6px;
     border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .header-btn:hover {
-    color: var(--text-color);
-    background: rgba(255,255,255,0.1);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
 }
 
 /* Add Group Button */
@@ -1035,6 +1063,117 @@ body.edit-mode .add-group-card {
 #edit-group-modal .color-clear-btn:hover {
     color: #ff3b30;
     background: rgba(255, 59, 48, 0.1);
+}
+
+/* Section selector */
+#edit-group-modal .section-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px 14px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
+}
+
+#edit-group-modal .section-new-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.06);
+    color: #86868b;
+    font-size: 1em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.12s;
+    line-height: 1;
+}
+
+#edit-group-modal .section-new-btn:hover {
+    background: rgba(0,122,255,0.1);
+    color: #007aff;
+}
+
+#edit-group-modal .section-input-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 24px 10px;
+}
+
+#edit-group-modal .section-name-input {
+    flex: 1;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 7px;
+    background: rgba(0,0,0,0.04);
+    color: #1d1d1f;
+    font-size: 0.82em;
+    font-family: inherit;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+#edit-group-modal .section-name-input:focus {
+    outline: none;
+    background: #fff;
+    box-shadow: 0 0 0 3.5px rgba(0,122,255,0.3);
+}
+
+#edit-group-modal .section-confirm-btn {
+    padding: 5px 12px;
+    border: none;
+    border-radius: 6px;
+    background: #007aff;
+    color: #fff;
+    font-size: 0.78em;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+#edit-group-modal .section-confirm-btn:hover {
+    background: #0066d6;
+}
+
+#edit-group-modal .section-cancel-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.06);
+    color: #86868b;
+    font-size: 0.75em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s;
+}
+
+#edit-group-modal .section-cancel-btn:hover {
+    background: rgba(255,59,48,0.1);
+    color: #ff3b30;
+}
+
+#edit-group-modal .section-select {
+    flex: 1;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 7px;
+    background: rgba(0,0,0,0.04);
+    color: #1d1d1f;
+    font-size: 0.82em;
+    font-family: inherit;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%2386868b'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 24px;
 }
 
 #edit-group-modal .brand-url:focus {
@@ -1784,6 +1923,88 @@ body.edit-mode .add-group-card {
 
 .settings-select-sm {
     flex: 0 0 90px;
+}
+
+/* Sections manager */
+.sections-manager {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.section-manager-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.02);
+}
+
+.section-manager-row:hover {
+    background: rgba(0,0,0,0.04);
+}
+
+.section-manager-row input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border: 0.5px solid rgba(0,0,0,0.12);
+    border-radius: 50%;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    background: none;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.section-manager-row input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.section-manager-row input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+}
+
+.section-manager-row input[type="text"] {
+    flex: 1;
+    padding: 5px 8px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #1d1d1f;
+    font-size: 0.85em;
+    font-family: inherit;
+    margin: 0;
+}
+
+.section-manager-row input[type="text"]:focus {
+    background: rgba(0,0,0,0.04);
+    outline: none;
+}
+
+.section-manager-delete {
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #c7c7cc;
+    font-size: 0.7em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.12s;
+}
+
+.section-manager-delete:hover {
+    background: rgba(255,59,48,0.1);
+    color: #ff3b30;
 }
 
 /* Wallpaper grid */
