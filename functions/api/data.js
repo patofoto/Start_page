@@ -1,6 +1,9 @@
 import { getAuthUser } from '../lib/auth.js';
 import { getStartPageKv } from '../lib/kv.js';
 
+// Keys that should only be visible to authenticated users
+const SENSITIVE_KEYS = ['brandfetchApiKey', 'brandfetchClientId'];
+
 export async function onRequestGet(context) {
   try {
     const kv = getStartPageKv(context.env);
@@ -20,7 +23,6 @@ export async function onRequestGet(context) {
 
     if (user) {
       isAuthorized = true;
-      // Check allowed emails if configured
       if (authConfig && authConfig.allowedEmails && authConfig.allowedEmails.length) {
         const allowList = authConfig.allowedEmails.map(e => e.toLowerCase());
         if (!allowList.includes(user.email.toLowerCase())) {
@@ -59,6 +61,11 @@ export async function onRequestGet(context) {
 
     if (!appData) {
       return new Response(null, { status: 404 });
+    }
+
+    // Strip sensitive keys from unauthenticated responses
+    if (!isAuthorized) {
+      SENSITIVE_KEYS.forEach(key => delete appData[key]);
     }
 
     return new Response(JSON.stringify(appData), {
