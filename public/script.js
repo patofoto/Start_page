@@ -1607,29 +1607,32 @@ function startClock() {
     setInterval(update, 1000);
 }
 
-// Calendar Widget
+// Calendar Widget (renders as first card in grid)
 async function fetchCalendarEvents() {
-    const widget = document.getElementById('calendar-widget');
-    if (!widget || !isAuthenticated) return;
+    if (!isAuthenticated) return;
+
+    // Remove existing calendar card if present
+    const existing = document.getElementById('calendar-card');
+    if (existing) existing.remove();
 
     try {
         const res = await fetch('/api/calendar');
-        if (!res.ok) {
-            widget.classList.add('hidden');
-            return;
-        }
+        if (!res.ok) return;
 
         const data = await res.json();
-        if (!data.events || data.events.length === 0) {
-            widget.classList.add('hidden');
-            return;
-        }
+        if (!data.events || data.events.length === 0) return;
 
-        widget.innerHTML = '';
-        const title = document.createElement('div');
-        title.className = 'calendar-title';
-        title.innerHTML = '<i class="fas fa-calendar-alt"></i> Upcoming';
-        widget.appendChild(title);
+        const card = document.createElement('div');
+        card.className = 'card calendar-card';
+        card.id = 'calendar-card';
+
+        const header = document.createElement('div');
+        header.className = 'card-header';
+        header.innerHTML = '<span class="group-title"><i class="fas fa-calendar-alt"></i> Upcoming</span>';
+        card.appendChild(header);
+
+        const body = document.createElement('div');
+        body.className = 'card-body';
 
         data.events.slice(0, 5).forEach(event => {
             const el = document.createElement('a');
@@ -1642,13 +1645,22 @@ async function fetchCalendarEvents() {
                 <span class="calendar-event-time">${time}</span>
                 <span class="calendar-event-title">${event.title}</span>
             `;
-            widget.appendChild(el);
+            body.appendChild(el);
         });
 
-        widget.classList.remove('hidden');
+        card.appendChild(body);
+
+        // Insert as first card in grid
+        const grid = document.getElementById('grid-container');
+        if (grid && grid.firstChild) {
+            grid.insertBefore(card, grid.firstChild);
+        } else if (grid) {
+            grid.appendChild(card);
+        }
+        resizeObserver.observe(card);
+        resizeGridItem(card);
     } catch (e) {
-        // Calendar not available — silently hide
-        widget.classList.add('hidden');
+        // Calendar not available — silently skip
     }
 }
 

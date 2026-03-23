@@ -81,32 +81,12 @@ header {
     margin-bottom: 8px;
 }
 
-/* Calendar Widget */
-.calendar-widget {
-    margin-top: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 12px;
-    border: 0.5px solid rgba(255, 255, 255, 0.15);
+/* Calendar Card */
+.calendar-card .card-header {
     padding: 10px 12px;
-    max-width: 280px;
 }
 
-.calendar-widget.hidden {
-    display: none;
-}
-
-.calendar-title {
-    font-size: 0.7em;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: rgba(255, 255, 255, 0.5);
-    margin-bottom: 6px;
-}
-
-.calendar-title i {
+.calendar-card .card-header i {
     margin-right: 4px;
 }
 
