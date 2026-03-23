@@ -2002,30 +2002,59 @@ body.edit-mode .add-group-card {
 }
 
 /* Media Queries for Responsiveness */
+/* Move search below header at medium screens */
+@media (max-width: 1200px) {
+    header {
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+    }
+
+    .search-container {
+        grid-column: 1 / -1;
+        order: 3;
+        justify-content: stretch;
+        padding-top: 0;
+    }
+
+    .search-bar-wrapper {
+        width: 100%;
+    }
+}
+
 @media (max-width: 800px) {
     header {
-        grid-template-columns: 1fr;
-        gap: 20px;
-        text-align: center;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        padding: 20px 16px 12px;
     }
-    
+
     .header-left {
-        align-items: center;
+        align-items: flex-start;
     }
-    
-    .search-container {
-        width: 100%;
-    }
-    
-    .search-bar {
-        width: 100%;
-    }
-    
+
     .settings-controls {
-        justify-content: center;
+        position: static;
+        padding-top: 0;
     }
-    
+
+    .search-container {
+        grid-column: 1 / -1;
+        order: 3;
+    }
+
+    .search-bar-wrapper {
+        width: 100%;
+    }
+
+    .search-bar {
+        border-radius: 10px;
+    }
+
     .clock {
         font-size: 3em;
+    }
+
+    .grid-container {
+        padding: 0 16px 32px;
     }
 }
