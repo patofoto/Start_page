@@ -187,8 +187,8 @@ function showToast(message, type = 'error', duration = 3500) {
 
 // --- Initialization ---
 async function init() {
-    await loadConfig();
     await loadData();
+    await loadConfig(); // runs after loadData so user's brandfetch key is available
     applyBackground();
     applyTypography();
     startClock();
@@ -276,17 +276,13 @@ function previewTypography() {
     if (lw) document.documentElement.style.setProperty('--link-weight', lw.value);
 }
 
-// Fetch config on init
-async function loadConfig() {
-    try {
-        const res = await fetch('/api/brandfetch_config');
-        if (res.ok) {
-            const data = await res.json();
-            BRANDFETCH_API_KEY = data.apiKey;
-            BRANDFETCH_CLIENT_ID = data.clientId;
-        }
-    } catch (e) {
-        console.error("Failed to load config", e);
+// Load Brandfetch keys from user settings (stored in appData, synced via KV)
+function loadConfig() {
+    if (appData.brandfetchApiKey) {
+        BRANDFETCH_API_KEY = appData.brandfetchApiKey;
+    }
+    if (appData.brandfetchClientId) {
+        BRANDFETCH_CLIENT_ID = appData.brandfetchClientId;
     }
 }
 
@@ -1496,14 +1492,19 @@ async function saveGroupEdit() {
 
         // Fetch brand data if needed
         if (isBranded && brandUrl) {
-            // Check if we need to fetch (url changed or data missing)
             if (brandUrl !== currentGroup.brandUrl || !currentGroup.brandData) {
-                try {
-                    brandData = await fetchBrandData(brandUrl);
-                } catch (e) {
-                    console.error("Failed to fetch brand data", e);
-                    alert("Could not fetch brand data. Please check the domain.");
-                    // Fallback to existing if available?
+                if (!BRANDFETCH_API_KEY) {
+                    // No API key — save branded flag and URL but skip fetch
+                    showToast("Add a Brandfetch API key in Settings → Account to enable brand styling.", "info");
+                    brandData = currentGroup.brandData || null;
+                } else {
+                    try {
+                        brandData = await fetchBrandData(brandUrl);
+                    } catch (e) {
+                        console.error("Failed to fetch brand data", e);
+                        showToast("Could not fetch brand data for " + brandUrl, "error");
+                        brandData = currentGroup.brandData || null;
+                    }
                 }
             } else {
                 // Keep existing data
@@ -1756,6 +1757,12 @@ function openSettingsModal() {
         hideLoggedOutCheckbox.checked = !!appData.hideWhenLoggedOut;
     }
 
+    // Brandfetch keys
+    const bfKeyInput = document.getElementById('settings-brandfetch-key');
+    const bfClientInput = document.getElementById('settings-brandfetch-client');
+    if (bfKeyInput) bfKeyInput.value = appData.brandfetchApiKey || '';
+    if (bfClientInput) bfClientInput.value = appData.brandfetchClientId || '';
+
     // --- Data tab ---
     const safeData = JSON.parse(JSON.stringify(appData || {}));
     if (safeData.authConfig) delete safeData.authConfig;
@@ -1967,6 +1974,24 @@ function setupEventListeners() {
                 linkFont: document.getElementById('settings-link-font').value,
                 linkWeight: document.getElementById('settings-link-weight').value,
             };
+
+            // Save Brandfetch keys
+            const bfKey = document.getElementById('settings-brandfetch-key').value.trim();
+            const bfClient = document.getElementById('settings-brandfetch-client').value.trim();
+            if (bfKey) {
+                appData.brandfetchApiKey = bfKey;
+                BRANDFETCH_API_KEY = bfKey;
+            } else {
+                delete appData.brandfetchApiKey;
+                BRANDFETCH_API_KEY = '';
+            }
+            if (bfClient) {
+                appData.brandfetchClientId = bfClient;
+                BRANDFETCH_CLIENT_ID = bfClient;
+            } else {
+                delete appData.brandfetchClientId;
+                BRANDFETCH_CLIENT_ID = '';
+            }
 
             // Save Auth Settings via separate secure endpoint
             const allowedEmailRaw = document.getElementById('settings-allowed-email').value.trim();

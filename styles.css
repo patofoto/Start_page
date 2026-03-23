@@ -1441,6 +1441,7 @@ body.edit-mode .add-group-card {
 
 .settings-panel select,
 .settings-panel input[type="text"],
+.settings-panel input[type="password"],
 .settings-panel textarea {
     width: 100%;
     padding: 8px 12px;
@@ -1457,6 +1458,7 @@ body.edit-mode .add-group-card {
 
 .settings-panel select:focus,
 .settings-panel input[type="text"]:focus,
+.settings-panel input[type="password"]:focus,
 .settings-panel textarea:focus {
     outline: none;
     background: #fff;
