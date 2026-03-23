@@ -40,8 +40,8 @@ Click **Fork** at the top of this page. This creates your own copy that stays co
 2. Click the **"Connect to Git"** tab
 3. Select your **Start_page** fork
 4. Configure the build:
-   - **Build command:** `npm run deploy`
-   - **Build output:** leave empty
+   - **Build command:** leave empty
+   - **Deploy command:** `npm run deploy`
 5. Click **Save and Deploy**
 
 The first deploy will automatically create a KV namespace for your data.
