@@ -2121,6 +2121,18 @@ body.edit-mode .add-group-card {
     margin-top: 4px;
 }
 
+.wallpaper-thumb-color {
+    aspect-ratio: 16 / 10;
+    border-radius: 8px;
+    border: 2.5px solid transparent;
+    cursor: pointer;
+    transition: border-color 0.15s;
+}
+
+.wallpaper-thumb.selected .wallpaper-thumb-color {
+    border-color: #007aff;
+}
+
 .wallpaper-thumb-custom {
     aspect-ratio: 16 / 10;
     border-radius: 8px;
@@ -2156,6 +2168,16 @@ body.edit-mode .add-group-card {
 .custom-url-row input[type="text"] {
     flex: 1;
     margin-bottom: 0;
+}
+
+.custom-url-row input[type="color"] {
+    flex: 1;
+    height: 36px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: none;
+    padding: 0;
 }
 
 .custom-url-row .btn {

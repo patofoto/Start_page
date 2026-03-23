@@ -143,8 +143,9 @@ function renderSectionsManager() {
     });
 }
 
-// Track selected wallpaper in settings
+// Track selected wallpaper/color in settings
 let selectedWallpaperUrl = null;
+let selectedBackgroundColor = null;
 
 // Track auth configuration (set by initAuth)
 let serverAuthEnabled = false;
@@ -327,7 +328,11 @@ async function init() {
 }
 
 function applyBackground() {
-    if (appData.backgroundUrl) {
+    if (appData.backgroundColor) {
+        document.body.style.backgroundImage = 'none';
+        document.body.style.backgroundColor = appData.backgroundColor;
+    } else if (appData.backgroundUrl) {
+        document.body.style.backgroundColor = '';
         document.body.style.backgroundImage = `url('${appData.backgroundUrl}')`;
     }
 }
@@ -2196,6 +2201,8 @@ function openSettingsModal() {
     // --- Appearance tab ---
     // Wallpaper picker
     selectedWallpaperUrl = appData.backgroundUrl || PRESET_WALLPAPERS[0].url;
+    selectedBackgroundColor = appData.backgroundColor || null;
+    if (selectedBackgroundColor) selectedWallpaperUrl = null;
     renderWallpaperGrid();
 
     // Layout radios
@@ -2324,27 +2331,47 @@ function renderWallpaperGrid() {
         `;
         thumb.addEventListener('click', () => {
             selectedWallpaperUrl = wp.url;
+            selectedBackgroundColor = null;
             document.getElementById('custom-url-input').style.display = 'none';
+            const colorRow = document.getElementById('color-picker-input');
+            if (colorRow) colorRow.style.display = 'none';
             renderWallpaperGrid();
-            // Live preview
+            document.body.style.backgroundColor = '';
             document.body.style.backgroundImage = `url('${wp.url}')`;
         });
         grid.appendChild(thumb);
     });
 
+    // Solid Color tile
+    const isColor = !!selectedBackgroundColor;
+    const colorThumb = document.createElement('div');
+    colorThumb.className = 'wallpaper-thumb' + (isColor ? ' selected' : '');
+    colorThumb.innerHTML = `
+        <div class="wallpaper-thumb-color" style="background:${selectedBackgroundColor || '#1a1a2e'}"></div>
+        <div class="wp-check">✓</div>
+        <div class="wp-name">Color</div>
+    `;
+    colorThumb.addEventListener('click', () => {
+        document.getElementById('custom-url-input').style.display = 'none';
+        document.getElementById('color-picker-input').style.display = 'flex';
+        document.getElementById('bg-color-picker').focus();
+    });
+    grid.appendChild(colorThumb);
+
     // Custom URL tile
     const customThumb = document.createElement('div');
-    customThumb.className = 'wallpaper-thumb' + (isCustom ? ' selected' : '');
+    customThumb.className = 'wallpaper-thumb' + (isCustom && !isColor ? ' selected' : '');
     customThumb.innerHTML = `
         <div class="wallpaper-thumb-custom"><span>+</span></div>
         <div class="wp-check">✓</div>
         <div class="wp-name">Custom URL</div>
     `;
     customThumb.addEventListener('click', () => {
+        document.getElementById('color-picker-input').style.display = 'none';
         const urlRow = document.getElementById('custom-url-input');
         urlRow.style.display = 'flex';
         const urlInput = document.getElementById('wallpaper-custom-url');
-        if (isCustom && currentUrl) {
+        if (isCustom && !isColor && currentUrl) {
             urlInput.value = currentUrl;
         }
         urlInput.focus();
@@ -2352,9 +2379,14 @@ function renderWallpaperGrid() {
     grid.appendChild(customThumb);
 
     // Pre-fill custom URL if active
-    if (isCustom && currentUrl) {
+    if (isCustom && !isColor && currentUrl) {
         document.getElementById('custom-url-input').style.display = 'flex';
         document.getElementById('wallpaper-custom-url').value = currentUrl;
+    }
+    // Pre-fill color picker if active
+    if (isColor) {
+        document.getElementById('color-picker-input').style.display = 'flex';
+        document.getElementById('bg-color-picker').value = selectedBackgroundColor;
     }
 }
 
@@ -2458,9 +2490,21 @@ function setupEventListeners() {
         const url = document.getElementById('wallpaper-custom-url').value.trim();
         if (url) {
             selectedWallpaperUrl = url;
+            selectedBackgroundColor = null;
             renderWallpaperGrid();
+            document.body.style.backgroundColor = '';
             document.body.style.backgroundImage = `url('${url}')`;
         }
+    });
+
+    // Background color apply
+    document.getElementById('apply-bg-color').addEventListener('click', () => {
+        const color = document.getElementById('bg-color-picker').value;
+        selectedBackgroundColor = color;
+        selectedWallpaperUrl = null;
+        renderWallpaperGrid();
+        document.body.style.backgroundImage = 'none';
+        document.body.style.backgroundColor = color;
     });
 
     // Add section from settings
@@ -2544,8 +2588,14 @@ function setupEventListeners() {
             });
             appData.openLinksInNewTab = openInNewTab;
 
-            // Save wallpaper
-            appData.backgroundUrl = selectedWallpaperUrl;
+            // Save wallpaper or color
+            if (selectedBackgroundColor) {
+                appData.backgroundColor = selectedBackgroundColor;
+                appData.backgroundUrl = '';
+            } else {
+                appData.backgroundUrl = selectedWallpaperUrl;
+                appData.backgroundColor = '';
+            }
 
             // Save typography
             appData.typography = {
