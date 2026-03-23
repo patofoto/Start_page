@@ -211,10 +211,14 @@
                 <div class="settings-tab-content" data-tab="data">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                         <div class="settings-section-label" style="margin-bottom:0;">JSON Data</div>
-                        <button id="copy-json-btn" class="btn btn-secondary">Copy</button>
+                        <div style="display:flex;gap:6px;">
+                            <button id="import-json-btn" class="btn btn-secondary">Import</button>
+                            <button id="export-json-btn" class="btn btn-secondary">Export</button>
+                        </div>
                     </div>
                     <p class="settings-hint">Warning: editing JSON directly can break the app.</p>
                     <textarea id="config-json" rows="12" class="settings-json-textarea"></textarea>
+                    <input type="file" id="import-json-file" accept=".json" style="display:none;">
                 </div>
             </div>
 

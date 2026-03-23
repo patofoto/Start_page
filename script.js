@@ -1904,39 +1904,39 @@ function setupEventListeners() {
     });
 
     document.getElementById('close-settings').addEventListener('click', closeSettingsModal);
-    document.getElementById('copy-json-btn').addEventListener('click', (e) => {
-        e.preventDefault();
+    // Export JSON — download as file
+    document.getElementById('export-json-btn').addEventListener('click', () => {
         const textarea = document.getElementById('config-json');
-        const textToCopy = textarea.value;
+        const blob = new Blob([textarea.value], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'start-page-data.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("JSON exported", "success");
+    });
 
-        // Helper for legacy copy
-        const legacyCopy = () => {
-            textarea.focus();
-            textarea.select();
-            textarea.setSelectionRange(0, 99999); // Mobile fallback
+    // Import JSON — load from file
+    const importFileInput = document.getElementById('import-json-file');
+    document.getElementById('import-json-btn').addEventListener('click', () => {
+        importFileInput.click();
+    });
+    importFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
             try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    showToast("JSON copied to clipboard", "success");
-                } else {
-                    showToast("Failed to copy", "error");
-                }
+                const parsed = JSON.parse(evt.target.result);
+                document.getElementById('config-json').value = JSON.stringify(parsed, null, 2);
+                showToast("JSON imported — click Save to apply", "success");
             } catch (err) {
-                showToast("Failed to copy", "error");
+                showToast("Invalid JSON file", "error");
             }
         };
-
-        // Try Async Clipboard API first
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                showToast("JSON copied to clipboard", "success");
-            }).catch(err => {
-                console.warn('Clipboard write failed, trying fallback:', err);
-                legacyCopy();
-            });
-        } else {
-            legacyCopy();
-        }
+        reader.readAsText(file);
+        importFileInput.value = ''; // reset so same file can be re-imported
     });
 
     document.getElementById('save-settings').addEventListener('click', () => {
