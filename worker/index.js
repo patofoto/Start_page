@@ -11,6 +11,7 @@ import { onRequestPut as authSetupPut } from '../functions/api/auth_setup.js';
 import { onRequestGet as suggestGet } from '../functions/api/suggest.js';
 import { onRequestGet as brandfetchConfigGet } from '../functions/api/brandfetch_config.js';
 import { onRequestGet as setupStatusGet } from '../functions/api/setup_status.js';
+import { onRequestPost as setupGooglePost } from '../functions/api/setup_google.js';
 
 // Build a Pages-compatible context from the Worker request and env
 function buildContext(request, env, ctx) {
@@ -44,8 +45,9 @@ export default {
       // Auth setup
       if (path === '/api/auth_setup' && method === 'PUT') return authSetupPut(context);
 
-      // Setup status
+      // Setup
       if (path === '/api/setup/status' && method === 'GET') return setupStatusGet(context);
+      if (path === '/api/setup/google' && method === 'POST') return setupGooglePost(context);
 
       // Suggest (Google autocomplete proxy)
       if (path === '/api/suggest' && method === 'GET') return suggestGet(context);

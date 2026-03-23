@@ -511,11 +511,48 @@ async function initSetupWizard() {
         });
     }
 
-    // Skip Google setup
-    const skipGoogle = document.getElementById('setup-skip-google');
-    if (skipGoogle) {
-        skipGoogle.addEventListener('click', () => {
-            wizard.classList.add('hidden');
+    // Google OAuth setup
+    const googleSubmit = document.getElementById('setup-google-submit');
+    if (googleSubmit) {
+        googleSubmit.addEventListener('click', async () => {
+            const clientId = document.getElementById('setup-google-client-id').value.trim();
+            const clientSecret = document.getElementById('setup-google-client-secret').value.trim();
+            const errorEl = document.getElementById('setup-google-error');
+            errorEl.classList.add('hidden');
+
+            if (!clientId || !clientId.includes('.apps.googleusercontent.com')) {
+                errorEl.textContent = 'Client ID should end with .apps.googleusercontent.com';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            if (!clientSecret) {
+                errorEl.textContent = 'Client Secret is required.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            googleSubmit.disabled = true;
+            googleSubmit.textContent = 'Saving...';
+
+            try {
+                const res = await fetch('/api/setup/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ clientId, clientSecret }),
+                });
+                if (res.ok) {
+                    showStep('done');
+                } else {
+                    const data = await res.json();
+                    errorEl.textContent = data.error || 'Setup failed.';
+                    errorEl.classList.remove('hidden');
+                }
+            } catch (e) {
+                errorEl.textContent = 'Network error.';
+                errorEl.classList.remove('hidden');
+            }
+            googleSubmit.disabled = false;
+            googleSubmit.textContent = 'Save & Enable Google Sign-In';
         });
     }
 

@@ -311,7 +311,7 @@
             <!-- Step 2b: Google OAuth instructions -->
             <div class="setup-step hidden" data-step="google">
                 <div class="setup-section-label">Set up Google Sign-In</div>
-                <p class="setup-hint">You'll need a <a href="https://console.cloud.google.com/" target="_blank">Google Cloud</a> project with OAuth credentials.</p>
+                <p class="setup-hint">You'll need a <a href="https://console.cloud.google.com/" target="_blank">Google Cloud</a> project with an OAuth 2.0 Client.</p>
                 <div class="setup-instructions">
                     <div class="setup-instruction-step">
                         <span class="setup-step-num">1</span>
@@ -329,21 +329,15 @@
                     </div>
                     <div class="setup-instruction-step">
                         <span class="setup-step-num">3</span>
-                        <span>Add the Client ID and Secret as Wrangler secrets:</span>
+                        <span>Paste your credentials below:</span>
                     </div>
                 </div>
-                <div class="setup-code-block">
-                    <code>npx wrangler secret put GOOGLE_CLIENT_ID</code><br>
-                    <code>npx wrangler secret put GOOGLE_CLIENT_SECRET</code>
-                </div>
-                <div class="setup-instruction-step" style="margin-top: 12px;">
-                    <span class="setup-step-num">4</span>
-                    <span>Redeploy: <code>npm run deploy</code></span>
-                </div>
-                <p class="setup-hint" style="margin-top: 12px;">After redeploying, refresh this page. The Google sign-in button will appear.</p>
+                <input type="text" id="setup-google-client-id" class="setup-input" placeholder="Google Client ID">
+                <input type="text" id="setup-google-client-secret" class="setup-input" placeholder="Google Client Secret">
+                <p id="setup-google-error" class="setup-error hidden"></p>
                 <div class="setup-actions">
                     <button class="setup-back-btn" data-back="auth-choice"><i class="fas fa-arrow-left"></i> Back</button>
-                    <button class="setup-skip-btn" id="setup-skip-google">I'll do this later</button>
+                    <button id="setup-google-submit" class="setup-primary-btn">Save & Enable Google Sign-In</button>
                 </div>
             </div>
 

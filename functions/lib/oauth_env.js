@@ -22,19 +22,28 @@ export async function getGoogleOAuthCredentials(context) {
     redirectUri = `${url.origin}/api/auth/callback`;
   }
 
-  // Fallback: check KV for legacy client ID
-  if (!clientId && env.START_PAGE_DATA) {
+  // Fallback: check KV for Google OAuth credentials (set via setup wizard)
+  let kvClientSecret = clientSecret;
+  if ((!clientId || !kvClientSecret) && env.START_PAGE_DATA) {
     try {
-      const kv = await env.START_PAGE_DATA.get('authConfig', { type: 'json' });
-      if (kv?.clientId) {
-        clientId = String(kv.clientId).trim();
+      const stored = await env.START_PAGE_DATA.get('_google_oauth', { type: 'json' });
+      if (stored?.clientId && stored?.clientSecret) {
+        if (!clientId) clientId = String(stored.clientId).trim();
+        if (!kvClientSecret) kvClientSecret = String(stored.clientSecret).trim();
       }
     } catch {
       /* ignore */
     }
+    // Legacy fallback
+    if (!clientId) {
+      try {
+        const kv = await env.START_PAGE_DATA.get('authConfig', { type: 'json' });
+        if (kv?.clientId) clientId = String(kv.clientId).trim();
+      } catch { /* ignore */ }
+    }
   }
 
-  return { clientId, clientSecret, redirectUri };
+  return { clientId, clientSecret: kvClientSecret, redirectUri };
 }
 
 /**

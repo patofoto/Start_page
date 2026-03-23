@@ -8,9 +8,19 @@ export async function onRequestGet(context) {
   const env = context.env;
   const kv = getStartPageKv(env);
 
-  const clientId = String(env.GOOGLE_CLIENT_ID ?? '').trim();
-  const hasGoogleClientId = clientId.includes('.apps.googleusercontent.com');
-  const hasGoogleClientSecret = !!String(env.GOOGLE_CLIENT_SECRET ?? '').trim() && hasGoogleClientId;
+  let clientId = String(env.GOOGLE_CLIENT_ID ?? '').trim();
+  let hasGoogleClientId = clientId.includes('.apps.googleusercontent.com');
+  let hasGoogleClientSecret = !!String(env.GOOGLE_CLIENT_SECRET ?? '').trim() && hasGoogleClientId;
+
+  // Also check KV for credentials saved via setup wizard
+  if (!hasGoogleClientId && kv) {
+    const stored = await kv.get('_google_oauth', { type: 'json' });
+    if (stored?.clientId?.includes('.apps.googleusercontent.com')) {
+      hasGoogleClientId = true;
+      hasGoogleClientSecret = !!stored.clientSecret;
+    }
+  }
+
   const googleConfigured = hasGoogleClientId && hasGoogleClientSecret;
 
   let passwordConfigured = false;
