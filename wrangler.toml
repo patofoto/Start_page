@@ -14,8 +14,3 @@ not_found_handling = "single-page-application"
 [[kv_namespaces]]
 binding = "START_PAGE_DATA"
 id = "b4dbead5f24c4e339cd8c55ced1cb526"
-
-# Optional secrets (set via `wrangler secret put`):
-# GOOGLE_CLIENT_ID      — Only needed for Google Sign-In
-# GOOGLE_CLIENT_SECRET   — Only needed for Google Sign-In
-# GOOGLE_REDIRECT_URI and JWT_SECRET are auto-generated — no need to set them
