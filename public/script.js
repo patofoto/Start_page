@@ -461,6 +461,7 @@ async function initAuth() {
         if (signInBtn) signInBtn.classList.add('hidden');
         if (passwordSignInBtn) passwordSignInBtn.classList.add('hidden');
         await refreshDataWithAuth();
+        fetchCalendarEvents();
     } else if (serverAuthEnabled) {
         // Auth configured but not signed in — show appropriate sign-in button
         if (googleEnabled && signInBtn) signInBtn.classList.remove('hidden');
@@ -1604,6 +1605,73 @@ function startClock() {
     }
     update();
     setInterval(update, 1000);
+}
+
+// Calendar Widget
+async function fetchCalendarEvents() {
+    const widget = document.getElementById('calendar-widget');
+    if (!widget || !isAuthenticated) return;
+
+    try {
+        const res = await fetch('/api/calendar');
+        if (!res.ok) {
+            widget.classList.add('hidden');
+            return;
+        }
+
+        const data = await res.json();
+        if (!data.events || data.events.length === 0) {
+            widget.classList.add('hidden');
+            return;
+        }
+
+        widget.innerHTML = '';
+        const title = document.createElement('div');
+        title.className = 'calendar-title';
+        title.innerHTML = '<i class="fas fa-calendar-alt"></i> Upcoming';
+        widget.appendChild(title);
+
+        data.events.slice(0, 5).forEach(event => {
+            const el = document.createElement('a');
+            el.className = 'calendar-event';
+            el.href = event.link;
+            el.target = '_blank';
+
+            const time = formatEventTime(event);
+            el.innerHTML = `
+                <span class="calendar-event-time">${time}</span>
+                <span class="calendar-event-title">${event.title}</span>
+            `;
+            widget.appendChild(el);
+        });
+
+        widget.classList.remove('hidden');
+    } catch (e) {
+        // Calendar not available — silently hide
+        widget.classList.add('hidden');
+    }
+}
+
+function formatEventTime(event) {
+    if (event.allDay) return 'All day';
+    try {
+        const date = new Date(event.start);
+        const now = new Date();
+        const isToday = date.toDateString() === now.toDateString();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const isTomorrow = date.toDateString() === tomorrow.toDateString();
+
+        const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+        if (isToday) return timeStr;
+        if (isTomorrow) return `Tomorrow ${timeStr}`;
+
+        const dayStr = date.toLocaleDateString([], { weekday: 'short' });
+        return `${dayStr} ${timeStr}`;
+    } catch {
+        return '';
+    }
 }
 
 // Weather

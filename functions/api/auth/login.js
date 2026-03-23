@@ -19,8 +19,9 @@ export async function onRequestGet(context) {
     client_id: GOOGLE_CLIENT_ID,
     redirect_uri: GOOGLE_REDIRECT_URI,
     response_type: 'code',
-    scope: 'openid email profile',
-    prompt: 'select_account',
+    scope: 'openid email profile https://www.googleapis.com/auth/calendar.events.readonly',
+    access_type: 'offline',
+    prompt: 'consent',
     state,
   });
 

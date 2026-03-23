@@ -75,6 +75,16 @@ export async function onRequestGet(context) {
     }));
   }
 
+  // Store Google tokens for API access (Calendar, etc.)
+  if (kv && tokens.access_token) {
+    const googleTokens = {
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token || null,
+      expires_at: Date.now() + (tokens.expires_in || 3600) * 1000,
+    };
+    await kv.put('_google_tokens', JSON.stringify(googleTokens));
+  }
+
   // Sign our own JWT
   const jwt = await signJwt(
     { email: profile.email, name: profile.name, picture: profile.picture },

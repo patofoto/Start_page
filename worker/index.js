@@ -13,6 +13,7 @@ import { onRequestGet as brandfetchConfigGet } from '../functions/api/brandfetch
 import { onRequestGet as setupStatusGet } from '../functions/api/setup_status.js';
 import { onRequestPost as setupGooglePost } from '../functions/api/setup_google.js';
 import { onRequestPost as linksAddPost, onRequestGet as linksGroupsGet } from '../functions/api/links_add.js';
+import { onRequestGet as calendarGet } from '../functions/api/calendar.js';
 
 // Build a Pages-compatible context from the Worker request and env
 function buildContext(request, env, ctx) {
@@ -66,6 +67,9 @@ export default {
       // Links (Chrome extension API)
       if (path === '/api/links/add' && method === 'POST') return linksAddPost(context);
       if (path === '/api/links/groups' && method === 'GET') return linksGroupsGet(context);
+
+      // Calendar
+      if (path === '/api/calendar' && method === 'GET') return calendarGet(context);
 
       // Suggest (Google autocomplete proxy)
       if (path === '/api/suggest' && method === 'GET') return suggestGet(context);
