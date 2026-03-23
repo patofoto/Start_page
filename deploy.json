@@ -1,0 +1,5 @@
+{
+  "$schema": "https://deploy.workers.cloudflare.com/schema.json",
+  "name": "start-page",
+  "secrets": {}
+}
