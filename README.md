@@ -165,6 +165,28 @@ Click the gear icon (top right, visible after sign-in) to open Settings:
 
 ---
 
+## Chrome Extension
+
+Save any page to your Start Page with one click.
+
+### Install
+
+1. Download or clone this repo
+2. Open `chrome://extensions` in Chrome
+3. Enable **Developer mode** (top right toggle)
+4. Click **Load unpacked** → select the `chrome-extension` folder
+
+### Usage
+
+1. Click the extension icon on any page
+2. First time: enter your Start Page URL (e.g., `yourdomain.com`)
+3. Pick a group from the dropdown
+4. Click **Add Link**
+
+The extension uses your existing login session — you must be signed into your Start Page in Chrome for it to work.
+
+---
+
 ## Troubleshooting
 
 **Can't sign in with Google?**
