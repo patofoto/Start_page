@@ -1439,6 +1439,7 @@ body.edit-mode .add-group-card {
     margin-bottom: 8px;
 }
 
+.settings-panel select,
 .settings-panel input[type="text"],
 .settings-panel textarea {
     width: 100%;
@@ -1454,6 +1455,7 @@ body.edit-mode .add-group-card {
     box-sizing: border-box;
 }
 
+.settings-panel select:focus,
 .settings-panel input[type="text"]:focus,
 .settings-panel textarea:focus {
     outline: none;
