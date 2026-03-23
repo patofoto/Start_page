@@ -1030,26 +1030,29 @@ function createLinkIcon(url, useFavicon = false) {
             const urlObj = new URL(ensureProtocol(url));
             let checkDomain = urlObj.hostname;
 
-            // Fix for Data Studio -> Looker Studio redirect & Icon
+            // Match against Google Apps config for high-quality icons
+            const googleApp = googleAppsConfig.find(app => {
+                try {
+                    return new URL(app.url).hostname === checkDomain;
+                } catch { return false; }
+            });
+            if (googleApp && googleApp.iconStyle) {
+                const bgMatch = googleApp.iconStyle.match(/url\(['"]?([^'")\s]+)['"]?\)/);
+                if (bgMatch) {
+                    img.src = bgMatch[1];
+                    return img;
+                }
+            }
+
+            // Additional Google overrides not in googleAppsConfig
             if (checkDomain === 'datastudio.google.com' || checkDomain === 'lookerstudio.google.com') {
-                // Return specific high-quality SVG for Looker Studio
                 img.src = 'https://www.gstatic.com/analytics-lego/svg/ic_looker_studio.svg';
                 return img;
             }
-
-            // Google Search Console
             if (checkDomain === 'search.google.com') {
                 img.src = 'https://www.gstatic.com/search-console/scfe/favicon.png';
                 return img;
             }
-
-            // Google Analytics
-            if (checkDomain === 'analytics.google.com') {
-                img.src = 'https://www.gstatic.com/analytics-suite/header/suite/v2/ic_analytics.svg';
-                return img;
-            }
-
-            // Google Tag Manager
             if (checkDomain === 'tagmanager.google.com') {
                 img.src = 'https://www.gstatic.com/analytics-suite/header/suite/v2/ic_tag_manager.svg';
                 return img;
