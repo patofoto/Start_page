@@ -42,6 +42,7 @@ Click **Fork** at the top of this page. This creates your own copy that stays co
 4. Configure the build:
    - **Build command:** leave empty
    - **Deploy command:** `npm run deploy`
+   - **Non-production branch deploy command:** `npm run deploy`
 5. Click **Save and Deploy**
 
 The first deploy will automatically create a KV namespace for your data.
