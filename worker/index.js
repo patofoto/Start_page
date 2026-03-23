@@ -12,6 +12,7 @@ import { onRequestGet as suggestGet } from '../functions/api/suggest.js';
 import { onRequestGet as brandfetchConfigGet } from '../functions/api/brandfetch_config.js';
 import { onRequestGet as setupStatusGet } from '../functions/api/setup_status.js';
 import { onRequestPost as setupGooglePost } from '../functions/api/setup_google.js';
+import { onRequestPost as linksAddPost, onRequestGet as linksGroupsGet } from '../functions/api/links_add.js';
 
 // Build a Pages-compatible context from the Worker request and env
 function buildContext(request, env, ctx) {
@@ -27,6 +28,19 @@ export default {
 
     // Route API requests
     if (path.startsWith('/api/')) {
+      // CORS preflight for Chrome extension
+      if (method === 'OPTIONS') {
+        return new Response(null, {
+          headers: {
+            'Access-Control-Allow-Origin': request.headers.get('Origin') || '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Allow-Credentials': 'true',
+            'Access-Control-Max-Age': '86400',
+          }
+        });
+      }
+
       // Auth routes
       if (path === '/api/auth/login' && method === 'GET') return authLoginGet(context);
       if (path === '/api/auth/callback' && method === 'GET') return authCallbackGet(context);
@@ -48,6 +62,10 @@ export default {
       // Setup
       if (path === '/api/setup/status' && method === 'GET') return setupStatusGet(context);
       if (path === '/api/setup/google' && method === 'POST') return setupGooglePost(context);
+
+      // Links (Chrome extension API)
+      if (path === '/api/links/add' && method === 'POST') return linksAddPost(context);
+      if (path === '/api/links/groups' && method === 'GET') return linksGroupsGet(context);
 
       // Suggest (Google autocomplete proxy)
       if (path === '/api/suggest' && method === 'GET') return suggestGet(context);
