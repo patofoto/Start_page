@@ -146,8 +146,10 @@ function renderSectionsManager() {
 // Track selected wallpaper in settings
 let selectedWallpaperUrl = null;
 
-// Track whether server has OAuth configured (set by initAuth)
+// Track auth configuration (set by initAuth)
 let serverAuthEnabled = false;
+let serverGoogleEnabled = false;
+let serverPasswordEnabled = false;
 
 // Remove deprecated apps from enabledGoogleApps
 const APPS_TO_REMOVE = ["Search", "News", "Chat", "Contacts", "Photos", "Voice", "Shopping", "Keep", "Forms"];
@@ -435,6 +437,8 @@ async function initAuth() {
             passwordEnabled = !!cfg.passwordAuthEnabled;
             setupComplete = !!cfg.setupComplete;
             serverAuthEnabled = googleEnabled || passwordEnabled;
+            serverGoogleEnabled = googleEnabled;
+            serverPasswordEnabled = passwordEnabled;
         }
     } catch (e) {
         console.log('Auth config check failed', e);
@@ -676,8 +680,9 @@ function updateAccountIcon(pictureUrl) {
 function updateAuthUI(isSignedIn) {
     const editBtn = document.getElementById('edit-mode-btn');
     const logoutBtn = document.getElementById('logout-btn');
-    const signInBtnContainer = document.getElementById('google-signin-btn');
-    
+    const googleSignInBtn = document.getElementById('google-signin-btn');
+    const passwordSignInBtn = document.getElementById('password-signin-btn');
+
     const canEdit = computeCanEdit(isSignedIn);
 
     if (isSignedIn) {
@@ -688,17 +693,16 @@ function updateAuthUI(isSignedIn) {
             if (isEditMode) toggleEditMode();
         }
         logoutBtn.classList.remove('hidden');
-        if(signInBtnContainer) signInBtnContainer.style.display = 'none';
+        if (googleSignInBtn) googleSignInBtn.classList.add('hidden');
+        if (passwordSignInBtn) passwordSignInBtn.classList.add('hidden');
     } else {
         editBtn.classList.add('hidden');
         logoutBtn.classList.add('hidden');
-        // Exit edit mode if active
         if (isEditMode) toggleEditMode();
-        
-        if(signInBtnContainer) {
-            signInBtnContainer.style.display = '';
-            signInBtnContainer.classList.remove('hidden');
-        }
+
+        // Show the correct sign-in button based on what's configured
+        if (serverGoogleEnabled && googleSignInBtn) googleSignInBtn.classList.remove('hidden');
+        if (serverPasswordEnabled && passwordSignInBtn) passwordSignInBtn.classList.remove('hidden');
     }
     updateSettingsVisibility(isSignedIn, canEdit);
     applyLoggedOutPrivacy(isSignedIn);
