@@ -2408,7 +2408,46 @@ function closeSettingsModal() {
 
 function setupEventListeners() {
     window.addEventListener("resize", resizeAllGridItems);
-    
+
+    // Global keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        // Ignore when typing in an input/textarea/select
+        const tag = e.target.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) {
+            // Escape blurs the current input
+            if (e.key === 'Escape') e.target.blur();
+            return;
+        }
+
+        // Ignore when a modal is open
+        const modalOpen = document.querySelector('.modal:not(.hidden)');
+
+        if (e.key === '/' || e.key === 's') {
+            // Focus search
+            e.preventDefault();
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) searchInput.focus();
+        } else if (e.key === 'e' && !modalOpen && isAuthenticated) {
+            // Toggle edit mode
+            e.preventDefault();
+            toggleEditMode();
+        } else if (e.key === ',' && !modalOpen && isAuthenticated) {
+            // Open settings
+            e.preventDefault();
+            openSettingsModal();
+        } else if (e.key === 'Escape') {
+            // Close any open modal
+            if (modalOpen) {
+                modalOpen.classList.add('hidden');
+            }
+            // Close search dropdown
+            const searchDropdown = document.getElementById('search-dropdown');
+            if (searchDropdown && !searchDropdown.classList.contains('hidden')) {
+                searchDropdown.classList.add('hidden');
+            }
+        }
+    });
+
     editModeBtn.addEventListener('click', toggleEditMode);
     settingsBtn.addEventListener('click', openSettingsModal);
     

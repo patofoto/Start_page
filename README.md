@@ -152,13 +152,24 @@ Password auth works locally with no configuration.
 
 ---
 
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `/` or `S` | Focus search |
+| `E` | Toggle edit mode |
+| `,` | Open settings |
+| `Esc` | Close modal / blur search |
+
+---
+
 ## Settings
 
 Click the gear icon (top right, visible after sign-in) to open Settings:
 
 | Tab | What it does |
 |-----|-------------|
-| **Appearance** | Change wallpaper, layout, fonts, and manage sections |
+| **Appearance** | Change wallpaper, layout, fonts, sections, and keyboard shortcuts |
 | **Google Apps** | Choose which Google apps show in the launcher |
 | **Account** | Set allowed emails, privacy mode, Brandfetch API keys |
 | **Data** | Import/export your data as JSON, reset to defaults |
