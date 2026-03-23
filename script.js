@@ -83,26 +83,26 @@ cleanupApps();
 const googleAppsConfig = [
     { name: "Account", url: "https://myaccount.google.com", iconStyle: "background-image: url('https://lh3.googleusercontent.com/a/default-user=s128'); background-size: cover; background-position: center; border-radius: 50%;" },
     { name: "Search", url: "https://www.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/symbol.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
-    { name: "Maps", url: "https://maps.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idNQ5aWWN-.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
-    { name: "YouTube", url: "https://www.youtube.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/youtube.com/icon/theme/dark/icon.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
+    { name: "Maps", url: "https://maps.google.com", iconStyle: "background-image: url('https://www.gstatic.com/images/branding/product/2x/maps_48dp.png'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
+    { name: "YouTube", url: "https://www.youtube.com", iconStyle: "background-image: url('https://www.gstatic.com/images/branding/product/2x/youtube_64dp.png'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "News", url: "https://news.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idMbJg9Po3.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Gmail", url: "https://mail.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idBP5ltu-a.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Meet", url: "https://meet.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/ide81vGBGA.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Chat", url: "https://chat.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idlJx_D1re.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
-    { name: "Contacts", url: "https://contacts.google.com", iconStyle: "background-position: 0 -464px;" },
+    { name: "Contacts", url: "https://contacts.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idp4JxS-Wl.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Drive", url: "https://drive.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idncaAgFGT.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Calendar", url: "https://calendar.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idMX2_OMSc.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Translate", url: "https://translate.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idOA5j5-it.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Photos", url: "https://photos.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idXdVMQg1G.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
-    { name: "Voice", url: "https://voice.google.com", iconStyle: "background-position: 0 -348px;" },
+    { name: "Voice", url: "https://voice.google.com", iconStyle: "background-image: url('https://www.gstatic.com/images/branding/product/2x/voice_48dp.png'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Shopping", url: "https://shopping.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/id7WOXk600.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Docs", url: "https://docs.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/id9yxSb4R3.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Sheets", url: "https://sheets.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idKa2XnbFY.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Slides", url: "https://slides.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idY7x55JLN.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
-    { name: "Keep", url: "https://keep.google.com", iconStyle: "background-position: 0 -116px;" },
-    { name: "Analytics", url: "https://analytics.google.com", iconStyle: "background-position: 0 -2668px;" },
-    { name: "Google Ads", url: "https://ads.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idxtfw96uG.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
-    { name: "Gemini", url: "https://gemini.google.com", iconStyle: "background-position: 0 -1914px;" },
+    { name: "Keep", url: "https://keep.google.com", iconStyle: "background-image: url('https://www.gstatic.com/images/branding/product/2x/keep_2020q4_48dp.png'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
+    { name: "Analytics", url: "https://analytics.google.com", iconStyle: "background-image: url('https://www.gstatic.com/analytics-suite/header/suite/v2/ic_analytics.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
+    { name: "Google Ads", url: "https://ads.google.com", iconStyle: "background-image: url('https://www.gstatic.com/images/branding/product/2x/ads_48dp.png'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
+    { name: "Gemini", url: "https://gemini.google.com", iconStyle: "background-image: url('https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Travel", url: "https://travel.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idxy2tVjQB.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" },
     { name: "Forms", url: "https://forms.google.com", iconStyle: "background-image: url('https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idkfvuesuQ.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;" }
 ];
@@ -1734,14 +1734,42 @@ function openSettingsModal() {
         container.innerHTML = '';
         const enabledApps = appData.enabledGoogleApps || [];
         googleAppsConfig.forEach(app => {
-            const label = document.createElement('label');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = enabledApps.includes(app.name);
-            checkbox.value = app.name;
-            label.appendChild(checkbox);
-            label.appendChild(document.createTextNode(app.name));
-            container.appendChild(label);
+            const row = document.createElement('div');
+            row.className = 'app-toggle-row';
+
+            // Icon
+            const hasCustomIcon = app.iconStyle && app.iconStyle.includes('background-image');
+            const icon = document.createElement('span');
+            icon.className = 'app-toggle-icon';
+            if (hasCustomIcon) {
+                icon.style.cssText = app.iconStyle;
+            } else {
+                // Fallback: first letter
+                icon.textContent = app.name.charAt(0);
+                icon.classList.add('app-toggle-icon-letter');
+            }
+
+            // Name
+            const name = document.createElement('span');
+            name.className = 'app-toggle-name';
+            name.textContent = app.name;
+
+            // Toggle switch
+            const toggle = document.createElement('label');
+            toggle.className = 'toggle-switch';
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = enabledApps.includes(app.name);
+            input.value = app.name;
+            const slider = document.createElement('span');
+            slider.className = 'toggle-slider';
+            toggle.appendChild(input);
+            toggle.appendChild(slider);
+
+            row.appendChild(icon);
+            row.appendChild(name);
+            row.appendChild(toggle);
+            container.appendChild(row);
         });
     }
 
