@@ -15,15 +15,21 @@ export async function onRequestGet(context) {
   crypto.getRandomValues(stateBytes);
   const state = Array.from(stateBytes, b => b.toString(16).padStart(2, '0')).join('');
 
+  // Check if calendar is enabled (passed as query param from frontend)
+  const requestUrl = new URL(request.url);
+  const wantCalendar = requestUrl.searchParams.get('calendar') === '1';
+  const scopes = ['openid', 'email', 'profile'];
+  if (wantCalendar) scopes.push('https://www.googleapis.com/auth/calendar.events.readonly');
+
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
     redirect_uri: GOOGLE_REDIRECT_URI,
     response_type: 'code',
-    scope: 'openid email profile https://www.googleapis.com/auth/calendar.events.readonly',
-    access_type: 'offline',
-    prompt: 'consent',
+    scope: scopes.join(' '),
+    prompt: wantCalendar ? 'consent' : 'select_account',
     state,
   });
+  if (wantCalendar) params.set('access_type', 'offline');
 
   const headers = new Headers({
     Location: `https://accounts.google.com/o/oauth2/v2/auth?${params}`,

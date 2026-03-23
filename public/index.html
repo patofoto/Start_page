@@ -49,7 +49,7 @@
         </div>
 
         <div class="settings-controls">
-            <button id="google-signin-btn" title="Sign in with Google" class="hidden" onclick="window.location.href='/api/auth/login'">
+            <button id="google-signin-btn" title="Sign in with Google" class="hidden" onclick="window.location.href='/api/auth/login' + (appData && appData.calendarEnabled ? '?calendar=1' : '')">
                 <i class="fab fa-google"></i>
             </button>
             <button id="password-signin-btn" title="Sign in" class="hidden">
@@ -232,6 +232,13 @@
                         <input type="checkbox" id="settings-hide-loggedout">
                         Hide content when logged out
                     </label>
+
+                    <div class="settings-section-label" style="margin-top:24px;">Google Calendar</div>
+                    <label class="settings-checkbox-row">
+                        <input type="checkbox" id="settings-calendar-enabled">
+                        Show upcoming events
+                    </label>
+                    <p class="settings-hint">Requires Google Sign-In. You'll need to enable the <a href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank" style="color:#007aff;">Google Calendar API</a> in your Google Cloud project and re-sign in after enabling.</p>
 
                     <div class="settings-section-label" style="margin-top:24px;">Brandfetch API</div>
                     <label class="settings-field-label">API Key</label>

@@ -1609,7 +1609,7 @@ function startClock() {
 
 // Calendar Widget (renders as first card in grid)
 async function fetchCalendarEvents() {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !appData.calendarEnabled) return;
 
     // Remove existing calendar card if present
     const existing = document.getElementById('calendar-card');
@@ -2367,6 +2367,10 @@ function openSettingsModal() {
     if (hideLoggedOutCheckbox) {
         hideLoggedOutCheckbox.checked = !!appData.hideWhenLoggedOut;
     }
+    const calendarCheckbox = document.getElementById('settings-calendar-enabled');
+    if (calendarCheckbox) {
+        calendarCheckbox.checked = !!appData.calendarEnabled;
+    }
 
     // Brandfetch keys
     const bfKeyInput = document.getElementById('settings-brandfetch-key');
@@ -2748,8 +2752,10 @@ function setupEventListeners() {
             // Save Auth Settings via separate secure endpoint
             const allowedEmailRaw = document.getElementById('settings-allowed-email').value.trim();
             const hideLoggedOut = document.getElementById('settings-hide-loggedout').checked;
+            const calendarEnabled = document.getElementById('settings-calendar-enabled').checked;
 
             appData.hideWhenLoggedOut = hideLoggedOut;
+            appData.calendarEnabled = calendarEnabled;
 
             // Split comma-separated emails
             const allowedEmails = allowedEmailRaw
