@@ -4,7 +4,7 @@ A beautiful, customizable start page for your browser. Set it as your homepage a
 
 Built with an Apple-inspired "liquid glass" design. Syncs across all your devices.
 
-![Start Page](https://images.unsplash.com/photo-1460500063983-994d4c27756c?w=800&q=60)
+![Start Page](screenshot.png)
 
 ## What You Get
 
