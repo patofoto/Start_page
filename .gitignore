@@ -1,6 +1,8 @@
 data-bu.js
 .env
 .dev.vars
+wrangler.local.toml
+deploy.sh
 node_modules/
 .wrangler/
 .superpowers/

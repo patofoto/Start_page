@@ -2,9 +2,10 @@ name = "start-page"
 main = "worker/index.js"
 compatibility_date = "2024-12-01"
 
-routes = [
-  { pattern = "csullivan.me", custom_domain = true }
-]
+# To use a custom domain, uncomment and change:
+# routes = [
+#   { pattern = "yourdomain.com", custom_domain = true }
+# ]
 
 [assets]
 directory = "./public"
@@ -13,4 +14,4 @@ not_found_handling = "single-page-application"
 
 [[kv_namespaces]]
 binding = "START_PAGE_DATA"
-id = "b4dbead5f24c4e339cd8c55ced1cb526"
+id = "YOUR_KV_NAMESPACE_ID"
