@@ -50,8 +50,9 @@ The setup script will:
 ### Option B: Deploy Button
 
 Click the **Deploy to Cloudflare Workers** button above. On the deploy form:
+- Check **"Create private Git repository"** (recommended)
 - Select your Git account and create the KV namespace
-- **Leave GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET blank** (they're optional — only needed if you want Google Sign-In later)
+- **Leave GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET blank** (they're optional — you can set up Google Sign-In later through the setup wizard)
 - Click **Create and deploy**
 
 After it deploys, visit your new Workers URL and the setup wizard will walk you through the rest.
