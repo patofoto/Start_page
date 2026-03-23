@@ -1,188 +1,190 @@
 # Start Page
 
-A customizable, minimal, and responsive start page for your browser. Features a clock, weather widget, Google search with live autocomplete, Google Apps launcher, and a customizable grid of link groups. Designed for **Cloudflare Pages** with **Cloudflare KV** for syncing across devices.
+A customizable, minimal start page for your browser. Features a clock, weather widget, Google search with live autocomplete, Google Apps launcher, and a customizable grid of link groups — all wrapped in an Apple-inspired liquid glass design.
+
+Hosted on **Cloudflare Workers** with **Cloudflare KV** for syncing across devices.
 
 ## Features
 
-- **Customizable Links:** Organize sites into groups and lists with drag-and-drop reordering.
-- **Sections:** Group your card groups by category (e.g., "Clients", "Tools") with colored tint overlays.
-- **Live Search:** Search bar with Google autocomplete and instant search across your saved links.
-- **Sync Across Devices:** Data stored in Cloudflare KV — same layout everywhere.
-- **Google Integration:** Google Search, Apps Launcher, and server-side Google OAuth.
-- **Branded Groups:** Fetch brand colors, logos, and banners via Brandfetch API.
-- **Header Color:** Set custom header colors on non-branded groups.
-- **Background Wallpaper:** Choose from presets or set a custom URL.
+- **Link Groups:** Organize sites into groups and lists with drag-and-drop reordering.
+- **Sections:** Group your cards by category (e.g., "Clients", "Tools") with colored tint overlays.
+- **Live Search:** Google autocomplete + instant search across all your saved links, URLs, and group names.
+- **Sync Across Devices:** Data stored in Cloudflare KV — same layout everywhere you're logged in.
+- **Google Apps Launcher:** Quick access to Google services with official icons.
+- **Branded Groups:** Fetch brand colors, logos, and banners via Brandfetch API (key set in Settings).
+- **Header Colors:** Set custom header colors on non-branded groups.
+- **Wallpaper Picker:** Choose from presets or set a custom image URL.
 - **Typography:** Customize fonts and weights for clock, date, and links.
-- **Edit Mode:** Add, edit, move, or delete groups and links directly from the UI.
-- **Weather & Clock:** Real-time local time and weather.
-- **Privacy:** Hide all content when logged out.
-- **Apple-inspired Design:** Liquid glass UI with frosted glass cards, subtle animations, and iOS-style controls.
+- **Import/Export:** Download or upload your data as JSON.
+- **Privacy:** Hide all content when logged out — only the sign-in button shows.
+- **Responsive:** Full-screen edit modal with iOS-style tab bar on mobile.
 
 ## Tech Stack
 
-- **Frontend:** HTML5, CSS3, Vanilla JavaScript.
-- **Hosting:** Cloudflare Pages.
-- **Backend/Storage:** Cloudflare Pages Functions + Cloudflare KV.
-- **Auth:** Server-side Google OAuth → JWT (HS256) in httpOnly cookie (7-day expiry).
-- **Design:** Liquid glass aesthetic with backdrop-filter, system fonts (SF Pro), and Apple HIG-inspired layout.
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript
+- **Hosting:** Cloudflare Workers + Static Assets
+- **Storage:** Cloudflare KV
+- **Auth:** Server-side Google OAuth → JWT (HS256) in httpOnly cookie (7-day expiry)
+- **Design:** Liquid glass aesthetic — backdrop-filter, system fonts, Apple HIG-inspired
 
-## Setup & Deployment
+## Setup
 
 ### Prerequisites
 
-1. A Cloudflare account.
-2. Node.js and npm installed.
-3. Wrangler CLI installed (`npm install -g wrangler`).
+1. A [Cloudflare account](https://dash.cloudflare.com/sign-up) (free tier works)
+2. [Node.js](https://nodejs.org/) installed
+3. [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/) installed
 
-### 1. Local Development
+### 1. Clone & Install
 
 ```bash
+git clone https://github.com/csullivan145/Start_page.git
+cd Start_page
 npm install
+```
+
+### 2. Create a KV Namespace
+
+```bash
+wrangler kv namespace create START_PAGE_DATA
+```
+
+Copy the `id` from the output and update `wrangler.toml`:
+
+```toml
+[[kv_namespaces]]
+binding = "START_PAGE_DATA"
+id = "your-namespace-id-here"
+```
+
+### 3. Configure Google OAuth
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) → create a project.
+2. **Google Auth Platform → Branding** — configure the consent screen.
+3. **Audience** — set publishing status to **Production** (or add your email as a test user).
+4. **Clients** → **Create Client** (Web Application).
+5. Add your domain to **Authorized JavaScript origins** (e.g., `https://yourdomain.com`).
+6. Add `https://yourdomain.com/api/auth/callback` to **Authorized redirect URIs**.
+7. Copy the **Client ID** and **Client Secret**.
+
+### 4. Set Secrets
+
+```bash
+wrangler secret put GOOGLE_CLIENT_ID
+wrangler secret put GOOGLE_CLIENT_SECRET
+wrangler secret put GOOGLE_REDIRECT_URI
+wrangler secret put JWT_SECRET
+```
+
+When prompted:
+- `GOOGLE_CLIENT_ID` — from step 3
+- `GOOGLE_CLIENT_SECRET` — from step 3
+- `GOOGLE_REDIRECT_URI` — `https://yourdomain.com/api/auth/callback`
+- `JWT_SECRET` — generate with `openssl rand -base64 32`
+
+### 5. Update wrangler.toml
+
+Edit `wrangler.toml` and set your domain:
+
+```toml
+routes = [
+  { pattern = "yourdomain.com", custom_domain = true }
+]
+```
+
+### 6. Deploy
+
+```bash
+npm run deploy
+```
+
+### 7. First Login
+
+1. Visit your domain and click the Google sign-in button.
+2. After signing in, open **Settings → Account** and set your email in **Allowed Emails**.
+3. Click **Save** — now only your email can edit the page.
+
+### 8. Brandfetch API (Optional)
+
+To use branded group headers with auto-fetched logos and colors:
+
+1. Get a free API key at [brandfetch.com](https://brandfetch.com).
+2. Go to **Settings → Account → Brandfetch API**.
+3. Enter your **API Key** and **Client ID**.
+4. Save — keys sync across devices via KV.
+
+## Local Development
+
+```bash
 npm run dev
 ```
 
-`npm run dev` runs `wrangler pages dev` with `--kv START_PAGE_DATA` so the KV binding exists locally.
-
-For Google sign-in locally, create a **`.dev.vars`** file (gitignored):
+This runs `wrangler dev` on port 8788. For Google sign-in locally, create a **`.dev.vars`** file (gitignored):
 
 ```
 GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=GOCSPX-your-secret
 GOOGLE_REDIRECT_URI=http://localhost:8788/api/auth/callback
-JWT_SECRET=some-long-random-string
+JWT_SECRET=any-random-string
 ```
 
-Add `http://localhost:8788/api/auth/callback` to **Authorized redirect URIs** and `http://localhost:8788` to **Authorized JavaScript origins** in Google Cloud Console.
+Add `http://localhost:8788` to **Authorized JavaScript origins** and `http://localhost:8788/api/auth/callback` to **Authorized redirect URIs** in Google Cloud Console.
 
-### 2. Cloudflare Pages Deployment
+## Settings
 
-#### Step A: Deploy
+Settings are in a tabbed sidebar panel:
 
-```bash
-npx wrangler pages deploy . --project-name my-start-page --branch production
-```
-
-#### Step B: Create & Bind KV
-
-1. Cloudflare Dashboard → **Workers & Pages** → **KV** → Create namespace (e.g., `START_PAGE_DATA`).
-2. Pages project → **Settings** → **Functions** → **KV Namespace Bindings** → Variable name: `START_PAGE_DATA`.
-
-#### Step C: Configure Google OAuth
-
-1. **Google Cloud Console:**
-   - Create a project and configure the OAuth consent screen (set to **Production**).
-   - Create an OAuth 2.0 Client (Web Application).
-   - Add your domain to **Authorized JavaScript origins**.
-   - Add `https://your-domain.com/api/auth/callback` to **Authorized redirect URIs**.
-
-2. **Set secrets:**
-
-   ```bash
-   wrangler pages secret put GOOGLE_CLIENT_ID --project-name my-start-page
-   wrangler pages secret put GOOGLE_CLIENT_SECRET --project-name my-start-page
-   wrangler pages secret put GOOGLE_REDIRECT_URI --project-name my-start-page
-   wrangler pages secret put JWT_SECRET --project-name my-start-page
-   ```
-
-3. **Set allowed emails** — either in KV (`authConfig` key: `{"allowedEmails": ["you@email.com"]}`) or via Settings UI after first login.
-
-4. **Redeploy** after setting secrets.
-
-#### Step D: Brandfetch API (Optional)
-
-Branded group headers use the Brandfetch API. **No server-side secrets needed** — enter your API Key and Client ID in **Settings → Account → Brandfetch API**. Keys are stored in your app data and sync across devices.
-
-Get free keys at [brandfetch.com](https://brandfetch.com).
-
-### 3. Settings
-
-Settings are organized in a tabbed sidebar panel:
-
-| Tab | What it controls |
-|-----|-----------------|
-| **Appearance** | Wallpaper, layout mode, typography (fonts/weights), sections manager |
-| **Google Apps** | Toggle which Google apps appear in the launcher |
+| Tab | Controls |
+|-----|----------|
+| **Appearance** | Wallpaper, layout mode, typography, sections manager |
+| **Google Apps** | Toggle which apps appear in the launcher |
 | **Account** | Allowed emails, hide-when-logged-out, Brandfetch API keys |
 | **Data** | Import/Export JSON, reset defaults |
-
-### 4. Sections
-
-Sections let you visually group your card groups with colored tint overlays:
-
-1. **Create sections** in Settings → Appearance → Sections, or via the section dropdown in the Edit Group modal.
-2. **Assign groups** to sections in the Edit Group modal.
-3. Groups in the same section are automatically sorted together and share a colored glass tint.
-4. **Customize colors** in the Sections manager (Settings → Appearance).
-
-### 5. Auth Flow
-
-1. User clicks the Google icon (top right) → redirected to Google OAuth.
-2. Google redirects back to `/api/auth/callback` with an authorization code.
-3. Server exchanges code for user info, verifies email against allowed list.
-4. Server signs a JWT and sets it as an `httpOnly` cookie (7-day expiry).
-5. User is authenticated — edit button and settings become visible.
-6. On logout, the cookie is cleared via `POST /api/auth/logout`.
-
-### 6. Data Loading & Persistence
-
-- Page load: `GET /api/data` (KV) → `localStorage` fallback → `default_data.js` fallback.
-- Edits save to KV (and localStorage if privacy mode is off).
-- KV data persists across deploys.
-- Sensitive fields (Brandfetch API keys) are stripped from unauthenticated responses.
-
-**Privacy:** When "Hide content when logged out" is enabled, unauthenticated visitors see only the sign-in button. Data is not cached in localStorage when privacy mode is on.
 
 ## Project Structure
 
 ```
-index.html              — Main entry point
-styles.css              — All styling (liquid glass design)
-script.js               — Frontend logic, auth, search, settings
-default_data.js         — Fallback data when KV is empty
-functions/
+public/                     — Static assets (served by Worker)
+  index.html                — Main entry point
+  styles.css                — All styling (liquid glass design)
+  script.js                 — Frontend logic, auth, search, settings
+  default_data.js           — Fallback data when KV is empty
+  favicon.svg               — Glass grid favicon
+worker/
+  index.js                  — Worker entry point (API router)
+functions/                  — Route handlers (imported by worker)
   lib/
-    jwt.js              — JWT signing/verification (HS256)
-    auth.js             — Cookie parsing, getAuthUser helper
-    cookies.js          — Set-Cookie builder (Secure flag handling)
-    kv.js               — KV binding helper
-    oauth_env.js        — OAuth credential loading
+    jwt.js                  — JWT signing/verification (HS256)
+    auth.js                 — Cookie parsing, getAuthUser helper
+    cookies.js              — Set-Cookie builder
+    kv.js                   — KV binding helper
+    oauth_env.js            — OAuth credential loading
   api/
     auth/
-      login.js          — Redirects to Google OAuth
-      callback.js       — Exchanges code, sets JWT cookie
-      me.js             — Returns current user from cookie
-      logout.js         — Clears JWT cookie
-      config.js         — Returns OAuth configuration status
-    data.js             — GET/PUT app data (KV)
-    auth_setup.js       — PUT allowed emails (KV)
-    suggest.js          — Google autocomplete proxy
-    brandfetch_config.js — (Legacy) Brandfetch credentials endpoint
+      login.js              — Redirects to Google OAuth
+      callback.js           — Exchanges code, sets JWT cookie
+      me.js                 — Returns current user from cookie
+      logout.js             — Clears JWT cookie
+      config.js             — Returns OAuth config status
+    data.js                 — GET/PUT app data (KV)
+    auth_setup.js           — PUT allowed emails (KV)
+    suggest.js              — Google autocomplete proxy
+    brandfetch_config.js    — Legacy Brandfetch endpoint
+wrangler.toml               — Worker configuration
 ```
-
-## Migrating from Client-Side Google Sign-In
-
-If upgrading from the old GSI SDK version:
-
-1. `git pull origin main`
-2. Create Google OAuth Client with a **Client Secret** (old setup only needed Client ID).
-3. Add `https://your-domain.com/api/auth/callback` to redirect URIs.
-4. Set 4 secrets via `wrangler pages secret put` (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI, JWT_SECRET).
-5. Update KV `authConfig` — remove `clientId`, keep `allowedEmails`.
-6. Redeploy and hard refresh.
-
-See [detailed migration steps](#migrating-from-client-side-google-sign-in) in the previous README version if needed.
 
 ## Troubleshooting
 
 | Problem | Solution |
 |---------|----------|
-| `401: invalid_client` | Wrong Client ID. Compare Cloudflare secret with `.dev.vars` and Google Console. |
-| "OAuth client was deleted" | Create a new OAuth client in Google Cloud Console. |
-| "Access blocked" | OAuth consent screen not configured or in Testing mode. |
-| Buttons visible when logged out | Hard refresh — CSS may be cached. |
-| Branded groups not working | Add Brandfetch API Key and Client ID in Settings → Account. |
-| Weather not loading | Browser may be blocking geolocation. Falls back to NYC. |
-| Search autocomplete not working | The `/api/suggest` proxy requires the Pages Functions to be deployed. |
+| `invalid_client` on login | Wrong Client ID — check `wrangler secret list` matches Google Console. |
+| "OAuth client was deleted" | Create a new client in Google Cloud Console. |
+| "Access blocked" | Consent screen not configured or in Testing mode. |
+| Buttons visible when logged out | Hard refresh (`Cmd+Shift+R`). CSS may be cached. |
+| Branded groups not working | Add Brandfetch keys in Settings → Account. |
+| Weather not loading | Browser blocking geolocation — falls back to NYC. |
+| Search autocomplete empty | `/api/suggest` needs the Worker deployed (not just static files). |
+| Changes not showing on mobile | Clear site data in browser settings, or try incognito. |
 
 ## License
 

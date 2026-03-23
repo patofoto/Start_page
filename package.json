@@ -1,9 +1,11 @@
 {
   "name": "start-page",
   "private": true,
-  "description": "Personal start page (Cloudflare Pages + Functions)",
+  "description": "Personal start page (Cloudflare Worker + KV)",
   "scripts": {
-    "dev": "wrangler pages dev . --port 8788 --kv START_PAGE_DATA"
+    "dev": "wrangler dev --port 8788",
+    "deploy": "wrangler deploy",
+    "dev:pages": "wrangler pages dev . --port 8788 --kv START_PAGE_DATA"
   },
   "devDependencies": {
     "wrangler": "3.114.17"

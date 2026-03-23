@@ -1,0 +1,22 @@
+name = "start-page"
+main = "worker/index.js"
+compatibility_date = "2024-12-01"
+
+routes = [
+  { pattern = "csullivan.me", custom_domain = true }
+]
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[[kv_namespaces]]
+binding = "START_PAGE_DATA"
+id = "b4dbead5f24c4e339cd8c55ced1cb526"
+
+# Secrets (set via `wrangler secret put`):
+# GOOGLE_CLIENT_ID
+# GOOGLE_CLIENT_SECRET
+# GOOGLE_REDIRECT_URI
+# JWT_SECRET

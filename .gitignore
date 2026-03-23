@@ -3,3 +3,5 @@ data-bu.js
 .dev.vars
 node_modules/
 .wrangler/
+.superpowers/
+mockup-edit-modal.html
