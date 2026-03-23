@@ -523,8 +523,9 @@ body.edit-mode .group-handle {
     border-radius: 10px;
     text-decoration: none;
     color: var(--text-color);
+    font-family: var(--link-font, inherit);
     font-size: 0.88em;
-    font-weight: 400;
+    font-weight: var(--link-weight, 400);
     transition: background 0.12s;
     border: none;
     gap: 10px;
@@ -1340,9 +1341,9 @@ body.edit-mode .add-group-card {
 
 /* ── Settings Panel ── */
 #settings-modal.modal {
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
 }
 
 .settings-panel {
@@ -1553,6 +1554,55 @@ body.edit-mode .add-group-card {
 .settings-checkbox-list input[type="checkbox"] {
     width: auto;
     margin: 0;
+}
+
+/* Typography controls */
+.settings-type-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.settings-type-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settings-type-label {
+    font-size: 0.82em;
+    color: #555;
+    width: 50px;
+    flex-shrink: 0;
+}
+
+.settings-select {
+    flex: 1;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 7px;
+    background: rgba(0,0,0,0.04);
+    color: #1d1d1f;
+    font-size: 0.82em;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%2386868b'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 24px;
+}
+
+.settings-select:focus {
+    outline: none;
+    background-color: #fff;
+    box-shadow: 0 0 0 3.5px rgba(0, 122, 255, 0.3);
+}
+
+.settings-select-sm {
+    flex: 0 0 90px;
 }
 
 /* Wallpaper grid */

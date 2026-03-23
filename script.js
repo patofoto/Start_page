@@ -37,6 +37,24 @@ if (!appData.authConfig) {
     appData.authConfig = { configured: false };
 }
 
+// Font presets
+const FONT_OPTIONS = [
+    { id: 'system', name: 'System (SF Pro)', value: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif" },
+    { id: 'inter', name: 'Inter', value: "'Inter', sans-serif" },
+    { id: 'poppins', name: 'Poppins', value: "'Poppins', sans-serif" },
+    { id: 'dm-sans', name: 'DM Sans', value: "'DM Sans', sans-serif" },
+    { id: 'outfit', name: 'Outfit', value: "'Outfit', sans-serif" },
+    { id: 'sora', name: 'Sora', value: "'Sora', sans-serif" },
+];
+
+const WEIGHT_OPTIONS = [
+    { name: 'Thin', value: '200' },
+    { name: 'Light', value: '300' },
+    { name: 'Regular', value: '400' },
+    { name: 'Medium', value: '500' },
+    { name: 'Semi', value: '600' },
+];
+
 // Preset wallpapers
 const PRESET_WALLPAPERS = [
     { id: 'warm-nature', name: 'Warm Nature', url: 'https://images.unsplash.com/photo-1460500063983-994d4c27756c?w=1920&q=80' },
@@ -172,6 +190,7 @@ async function init() {
     await loadConfig();
     await loadData();
     applyBackground();
+    applyTypography();
     startClock();
     fetchWeather();
     setupEventListeners();
@@ -184,6 +203,77 @@ function applyBackground() {
     if (appData.backgroundUrl) {
         document.body.style.backgroundImage = `url('${appData.backgroundUrl}')`;
     }
+}
+
+function applyTypography() {
+    const typo = appData.typography || {};
+    const clockEl = document.getElementById('clock');
+    const dateEl = document.getElementById('date-display');
+
+    if (clockEl) {
+        if (typo.clockFont) clockEl.style.fontFamily = typo.clockFont;
+        if (typo.clockWeight) clockEl.style.fontWeight = typo.clockWeight;
+    }
+    if (dateEl) {
+        if (typo.dateFont) dateEl.style.fontFamily = typo.dateFont;
+        if (typo.dateWeight) dateEl.style.fontWeight = typo.dateWeight;
+    }
+    // Links get applied via CSS variable
+    if (typo.linkFont) {
+        document.documentElement.style.setProperty('--link-font', typo.linkFont);
+    }
+    if (typo.linkWeight) {
+        document.documentElement.style.setProperty('--link-weight', typo.linkWeight);
+    }
+}
+
+function populateFontSelects() {
+    const ids = ['settings-clock-font', 'settings-date-font', 'settings-link-font'];
+    ids.forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel || sel.options.length > 0) return;
+        FONT_OPTIONS.forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f.value;
+            opt.textContent = f.name;
+            sel.appendChild(opt);
+        });
+    });
+    const weightIds = ['settings-clock-weight', 'settings-date-weight', 'settings-link-weight'];
+    weightIds.forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel || sel.options.length > 0) return;
+        WEIGHT_OPTIONS.forEach(w => {
+            const opt = document.createElement('option');
+            opt.value = w.value;
+            opt.textContent = w.name;
+            sel.appendChild(opt);
+        });
+    });
+
+    // Live preview on change
+    [...ids, ...weightIds].forEach(id => {
+        const sel = document.getElementById(id);
+        if (sel) sel.addEventListener('change', previewTypography);
+    });
+}
+
+function previewTypography() {
+    const clockEl = document.getElementById('clock');
+    const dateEl = document.getElementById('date-display');
+    const cf = document.getElementById('settings-clock-font');
+    const cw = document.getElementById('settings-clock-weight');
+    const df = document.getElementById('settings-date-font');
+    const dw = document.getElementById('settings-date-weight');
+    const lf = document.getElementById('settings-link-font');
+    const lw = document.getElementById('settings-link-weight');
+
+    if (clockEl && cf) clockEl.style.fontFamily = cf.value;
+    if (clockEl && cw) clockEl.style.fontWeight = cw.value;
+    if (dateEl && df) dateEl.style.fontFamily = df.value;
+    if (dateEl && dw) dateEl.style.fontWeight = dw.value;
+    if (lf) document.documentElement.style.setProperty('--link-font', lf.value);
+    if (lw) document.documentElement.style.setProperty('--link-weight', lw.value);
 }
 
 // Fetch config on init
@@ -1626,6 +1716,17 @@ function openSettingsModal() {
     const linkRadios = document.querySelectorAll('input[name="link-behavior"]');
     linkRadios.forEach(r => r.checked = r.value === (openInNewTab ? 'new-tab' : 'same-tab'));
 
+    // Typography selects
+    populateFontSelects();
+    const typo = appData.typography || {};
+    const defaultFont = FONT_OPTIONS[0].value;
+    document.getElementById('settings-clock-font').value = typo.clockFont || defaultFont;
+    document.getElementById('settings-clock-weight').value = typo.clockWeight || '200';
+    document.getElementById('settings-date-font').value = typo.dateFont || defaultFont;
+    document.getElementById('settings-date-weight').value = typo.dateWeight || '400';
+    document.getElementById('settings-link-font').value = typo.linkFont || defaultFont;
+    document.getElementById('settings-link-weight').value = typo.linkWeight || '400';
+
     // --- Google Apps tab ---
     const container = document.getElementById('google-apps-toggles');
     if (container) {
@@ -1856,6 +1957,16 @@ function setupEventListeners() {
 
             // Save wallpaper
             appData.backgroundUrl = selectedWallpaperUrl;
+
+            // Save typography
+            appData.typography = {
+                clockFont: document.getElementById('settings-clock-font').value,
+                clockWeight: document.getElementById('settings-clock-weight').value,
+                dateFont: document.getElementById('settings-date-font').value,
+                dateWeight: document.getElementById('settings-date-weight').value,
+                linkFont: document.getElementById('settings-link-font').value,
+                linkWeight: document.getElementById('settings-link-weight').value,
+            };
 
             // Save Auth Settings via separate secure endpoint
             const allowedEmailRaw = document.getElementById('settings-allowed-email').value.trim();

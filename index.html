@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=Poppins:wght@200;300;400;500;600&family=DM+Sans:wght@200;300;400;500;600&family=Outfit:wght@200;300;400;500;600&family=Sora:wght@200;300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="background-overlay"></div>
@@ -152,6 +152,25 @@
                     <div class="settings-radio-group">
                         <label><input type="radio" name="layout-mode" value="masonry"> Masonry (Compact)</label>
                         <label><input type="radio" name="layout-mode" value="grid"> Grid (Equal Height)</label>
+                    </div>
+
+                    <div class="settings-section-label" style="margin-top:24px;">Typography</div>
+                    <div class="settings-type-controls">
+                        <div class="settings-type-row">
+                            <span class="settings-type-label">Clock</span>
+                            <select id="settings-clock-font" class="settings-select"></select>
+                            <select id="settings-clock-weight" class="settings-select settings-select-sm"></select>
+                        </div>
+                        <div class="settings-type-row">
+                            <span class="settings-type-label">Date</span>
+                            <select id="settings-date-font" class="settings-select"></select>
+                            <select id="settings-date-weight" class="settings-select settings-select-sm"></select>
+                        </div>
+                        <div class="settings-type-row">
+                            <span class="settings-type-label">Links</span>
+                            <select id="settings-link-font" class="settings-select"></select>
+                            <select id="settings-link-weight" class="settings-select settings-select-sm"></select>
+                        </div>
                     </div>
 
                     <div class="settings-section-label" style="margin-top:24px;">Links</div>
